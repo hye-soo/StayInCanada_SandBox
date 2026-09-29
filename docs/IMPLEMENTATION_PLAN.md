@@ -11,11 +11,19 @@ RCIC has final approval on every AI-touched output.
 
 - [ ] Define data model for clients, visa types, and required-document
       checklists (client ↔ visa type ↔ checklist items)
-- [ ] Client authentication (sign up / log in / session handling) —
-      planned to use Firebase Auth (per docs/DISCOVERY.md); open
-      question: whether the rest of the data store (client records,
-      checklists, questionnaire responses, documents) also lives in
-      Firebase (Firestore/Storage) or elsewhere — not yet decided
+- [ ] Client authentication (client self-sign-up / log in / session
+      handling) — external, client-facing app; not staff-provisioned
+      accounts. Planned to use Firebase Auth (per docs/DISCOVERY.md).
+      Open question: whether the rest of the data store (client
+      records, checklists, questionnaire responses, documents) also
+      lives in Firebase (Firestore/Storage) or elsewhere — not yet
+      decided
+- [ ] Open question: how does a self-signed-up account get connected
+      to its visa type and retainer-paid status, both of which are
+      only known after a staff-run consultation happens beforehand?
+      (e.g. open signup + staff links the account after, vs. an
+      invite code from the welcome email) — not yet decided, needs to
+      be resolved before the checklist-gating item below can be built
 - [ ] Seed/admin-manageable checklist definitions per visa type — open
       question: which visa types come first? Confirm with client
       before seeding (see docs/DISCOVERY.md)
