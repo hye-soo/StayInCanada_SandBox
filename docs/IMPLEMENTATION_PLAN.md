@@ -38,6 +38,11 @@ RCIC has final approval on every AI-touched output.
 
 ## Phase 2 — Document upload, AI verification & IRCC pipeline
 
+Cost preference: prefer free-tier AI/OCR services or open-source
+models over paid APIs where feasible (per docs/DISCOVERY.md); not a
+hard block — revisit if free-tier limits can't support the AI checks
+below.
+
 - [ ] Document upload endpoint/UI tied to checklist items (4 MB max
       per file, per IRCC requirement)
 - [ ] AI check of uploaded documents against the checklist, flagging
