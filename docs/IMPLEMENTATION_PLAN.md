@@ -3,15 +3,24 @@
 Standalone system for now (no Zoho integration) — see docs/DECISIONS.md
 2026-09-29.
 
+Guardrail: AI informs and verifies (flags, cross-checks, drafts) but
+never gives immigration advice or submits anything unreviewed — the
+RCIC has final approval on every AI-touched output.
+
 ## Phase 1 — Client accounts, visa-type checklist & intake questionnaire (data layer)
 
 - [ ] Define data model for clients, visa types, and required-document
       checklists (client ↔ visa type ↔ checklist items)
 - [ ] Client authentication (sign up / log in / session handling)
-- [ ] Seed/admin-manageable checklist definitions per visa type
+- [ ] Seed/admin-manageable checklist definitions per visa type — open
+      question: which visa types come first? Confirm with client
+      before seeding (see docs/DISCOVERY.md)
 - [ ] Gate checklist visibility on retainer-paid/onboarding status —
       checklists are only shown after the client's retainer is signed
       and paid, per the RCIC operations interview
+- [ ] Access control and encryption at rest for sensitive PII
+      (passports, DOB, family details) — data sensitivity constraint
+      from discovery, applies to all client records and uploads
 - [ ] Define data model for the smart intake questionnaire (structured
       responses per client — e.g. name, DOB, family/sibling details,
       occupation) that replaces the old intake form; feeds the AI

@@ -39,3 +39,17 @@ committed feature.
 outright in Phase 2 — rejected because the legal and technical
 feasibility (e.g. whether directly populating a government PDF form is
 permitted/reliable) has not been established.
+
+## 2026-09-29 — Project scope: forms-filling/client-workflow automation, not a lead-gen chatbot
+**Context:** The client (StayinCanada) had two candidate project ideas
+for the student team engagement: an internal forms-filling and client
+workflow automation tool, and a lead-generation chatbot for prospective
+clients.
+**Decision:** Scope the project entirely around forms-filling and
+client workflow automation (client portal, smart intake, AI
+cross-check, RCIC-reviewed auto-fill) as captured in this plan.
+**Alternatives considered:** A lead-generation chatbot (the client's
+"Idea 1") — not pursued for this engagement; it addresses the
+top-of-funnel inquiry stage rather than the post-retainer operational
+bottlenecks (incomplete CIFs, manual verification, no status
+visibility) that were the primary pain points surfaced in discovery.
