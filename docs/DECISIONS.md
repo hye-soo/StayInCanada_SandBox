@@ -53,3 +53,32 @@ cross-check, RCIC-reviewed auto-fill) as captured in this plan.
 top-of-funnel inquiry stage rather than the post-retainer operational
 bottlenecks (incomplete CIFs, manual verification, no status
 visibility) that were the primary pain points surfaced in discovery.
+
+## 2026-09-29 — Scope to a single visa type for the November deadline
+**Context:** The project has a hard end date (end of November 2026,
+student team, ~8–9 weeks left as of this decision). The full proposed
+solution — multi-visa-type checklists, broad AI document
+cross-verification, and IRCC PDF auto-fill — is too large to build to
+a reliable standard in that time, especially on free-tier AI/OCR
+services. The highest-risk, highest-value part of the project is the
+AI verification pipeline itself, not the number of visa types
+supported.
+**Decision:** Scope the MVP to exactly one visa type end-to-end
+(account → checklist → questionnaire → upload → AI verification →
+RCIC review), and split the plan into "must-ship by November" vs.
+"stretch goal" items. Data models are still built to allow more visa
+types later, but only one is seeded and demoed.
+**Alternatives considered:** Supporting multiple visa types from the
+start — rejected because it multiplies checklist/questionnaire
+content work without adding technical depth, spending time that's
+better spent making the AI verification pipeline actually reliable for
+one case first.
+
+## 2026-09-29 — MVP visa type: Student visa
+**Context:** The single-visa-type MVP decision above left open which
+visa type to build for. Discovery notes mention Spousal Sponsorship,
+TRV, and Study Permit as example pathways handled by the client.
+**Decision:** Build the MVP around the Student visa pathway.
+**Alternatives considered:** Spousal Sponsorship and TRV (Temporary
+Resident Visa) — not chosen for the MVP; can be added later using the
+same data model once Student visa proves the pipeline works.
