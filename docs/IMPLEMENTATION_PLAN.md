@@ -7,6 +7,13 @@ Guardrail: AI informs and verifies (flags, cross-checks, drafts) but
 never gives immigration advice or submits anything unreviewed — the
 RCIC has final approval on every AI-touched output.
 
+Differentiator (per docs/COMPETITVE.md): the product isn't just a
+checklist + AI checker — it's meant to explain *why* something's
+needed, *whose turn it is* to act, and *what happens next*, instead of
+competitors' vague statuses. Light versions of this are folded into
+the checklist and status-view items below rather than a separate
+subsystem.
+
 Scope for the November deadline: **one visa type only — Student visa**
 (see docs/DECISIONS.md 2026-09-29). Items below are split into **Must-ship**
 (the demo that proves the core idea works end-to-end) and **Stretch
@@ -50,7 +57,9 @@ work, not left as unfinished code).
 - [ ] API/route to fetch a logged-in client's checklist with each
       item's status (not yet uploaded / uploaded / missing)
 - [ ] Minimal client-facing page listing their checklist (read-only,
-      no upload yet)
+      no upload yet), with a short static "why this is needed" note
+      per checklist item — light version of the contextual-guidance
+      differentiator (docs/COMPETITVE.md), not a full FAQ/help system
 
 ## Phase 2 — Document upload, AI verification & IRCC pipeline
 
@@ -75,6 +84,20 @@ below.
 - [ ] RCIC review/approval UI — basic version: view the AI's flagged
       report and approve/reject. Demonstrates the human-in-the-loop
       guardrail that's central to the whole pitch; polish is stretch
+- [ ] Status field in-product that RCIC updates after manually
+      checking IRCC's portal (per original spec — automating this
+      check itself is not yet decided). Promoted from stretch per
+      competitive analysis (docs/COMPETITVE.md): status tracking is
+      P0/table-stakes across every competitor. Stays scoped to the
+      single Student visa track — no added complexity from the
+      single-visa-type decision
+- [ ] Client-facing status view — simple display of the current stage
+      (e.g. "Submitted to IRCC", "Awaiting IRCC Confirmation") on the
+      client's checklist page from the status field above, plus who
+      needs to act next (client vs. staff/RCIC) and a one-line "what
+      happens next" note per stage. Promoted from stretch alongside
+      the status field; kept minimal (no rich dashboard) to fit the
+      timeline
 
 ### Stretch goals
 
@@ -87,13 +110,15 @@ below.
       research spike above
 - [ ] Full AI cross-check coverage across every document type in the
       checklist, not just the 1–2 scoped for the must-ship demo
-- [ ] Status field in-product that RCIC updates after manually
-      checking IRCC's portal (per original spec — automating this
-      check itself is not yet decided)
+- [ ] Automated notifications/reminders (e.g. email/in-app nudge when
+      a document is missing or flagged) — marked P1/Important in
+      competitive analysis (docs/COMPETITVE.md); not currently in any
+      must-ship item
 
 ## Stretch goals (beyond Phase 2)
 
-- Application status tracker for clients
+- Richer client progress dashboard (beyond the simple status view
+  promoted into Phase 2 must-ship above)
 - In-portal communication channel (reduce email back-and-forth)
 - Support for additional visa types beyond the single MVP one
 - Zoho CRM/Drive integration, if/when the standalone decision is

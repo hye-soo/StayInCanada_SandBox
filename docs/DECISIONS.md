@@ -82,3 +82,37 @@ TRV, and Study Permit as example pathways handled by the client.
 **Alternatives considered:** Spousal Sponsorship and TRV (Temporary
 Resident Visa) — not chosen for the MVP; can be added later using the
 same data model once Student visa proves the pipeline works.
+
+## 2026-09-29 — Promote status tracking from stretch to must-ship
+**Context:** The 2026-09-29 "single visa type" decision split the plan
+into must-ship vs. stretch, and put status tracking (the RCIC-updated
+status field and a client-facing status view) in stretch. A
+competitive analysis (docs/COMPETITVE.md) done afterward scored status
+tracking / progress dashboard as P0-Essential — every direct
+competitor and even manual substitutes (spreadsheets) provide it.
+**Decision:** Promote the status field and a simple client-facing
+status view into Phase 2 must-ship. This doesn't add real scope risk
+because the single-visa-type decision already keeps it to one track;
+it's a status field plus a read-only display, not a new subsystem.
+**Alternatives considered:** Keeping it as stretch — rejected because
+skipping something every competitor (including manual spreadsheet
+workflows) already provides would make the MVP look incomplete by
+comparison, for comparatively low implementation cost.
+
+## 2026-09-29 — Fold contextual guidance into must-ship as a light version
+**Context:** An expanded docs/COMPETITVE.md reframed the product's core
+differentiator as contextual guidance — explaining why a document is
+needed, whose turn it is to act, and what happens next — versus
+competitors' vague statuses. This wasn't in the plan at all.
+**Decision:** Add a light version to already-must-ship items rather
+than a new subsystem: a short static "why this is needed" note per
+checklist item (Phase 1), and a "who acts next" + one-line "what
+happens next" note on the client-facing status view (Phase 2). A full
+FAQ/help system or staff-notes/messaging feature stays out of scope
+for November.
+**Alternatives considered:** Keeping it as a later enhancement —
+rejected because the competitive analysis frames it as the actual
+differentiator, not a nice-to-have, and the light version is cheap
+(static copy, not a new feature) so it fits the timeline; building the
+full version (FAQs, staff messaging) was rejected for November as too
+costly given everything else already committed.
