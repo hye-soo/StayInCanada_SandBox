@@ -11,7 +11,11 @@ RCIC has final approval on every AI-touched output.
 
 - [ ] Define data model for clients, visa types, and required-document
       checklists (client ↔ visa type ↔ checklist items)
-- [ ] Client authentication (sign up / log in / session handling)
+- [ ] Client authentication (sign up / log in / session handling) —
+      planned to use Firebase Auth (per docs/DISCOVERY.md); open
+      question: whether the rest of the data store (client records,
+      checklists, questionnaire responses, documents) also lives in
+      Firebase (Firestore/Storage) or elsewhere — not yet decided
 - [ ] Seed/admin-manageable checklist definitions per visa type — open
       question: which visa types come first? Confirm with client
       before seeding (see docs/DISCOVERY.md)
@@ -24,7 +28,9 @@ RCIC has final approval on every AI-touched output.
 - [ ] Define data model for the smart intake questionnaire (structured
       responses per client — e.g. name, DOB, family/sibling details,
       occupation) that replaces the old intake form; feeds the AI
-      cross-check in Phase 2
+      cross-check in Phase 2. Supports incremental/draft saves so
+      client progress auto-saves and resumes exactly where they left
+      off (core to the questionnaire, not deferred)
 - [ ] API/route to fetch a logged-in client's checklist with each
       item's status (not yet uploaded / uploaded / missing)
 - [ ] Minimal client-facing page listing their checklist (read-only,
@@ -56,7 +62,7 @@ RCIC has final approval on every AI-touched output.
 
 ## Later phases (not yet detailed)
 
-- Application status tracker for clients + auto-saving form entries
+- Application status tracker for clients
 - In-portal communication channel (reduce email back-and-forth)
 - Zoho CRM/Drive integration, if/when the standalone decision is
   revisited
