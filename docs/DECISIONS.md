@@ -116,3 +116,22 @@ differentiator, not a nice-to-have, and the light version is cheap
 (static copy, not a new feature) so it fits the timeline; building the
 full version (FAQs, staff messaging) was rejected for November as too
 costly given everything else already committed.
+
+## 2026-10-08 — Three separate logins (Client/Staff/Admin), fine-grained permissions deferred
+**Context:** Two earlier sessions (docs/CURRENT_USER_FLOW_V2.md and the
+sandbox-experiment permission matrix in docs/MEETING.md) raised whether
+the MVP should merge Admin and Consultant/RCIC into one "staff" login
+or build the real 3-role split, and left it open pending a sandbox
+experiment. docs/MVP.md, the team's own MVP scoping doc, settles this
+directly: "Client, Staff and Admin Login: separate experiences and
+access by user role" is listed under Foundation/Core MVP, while "Role
+Based Permissions" (fine-grained access control) is explicitly listed
+under "Later (If Time Allows)."
+**Decision:** Build three separate login experiences (Client, Staff,
+Admin) as part of Phase 1 must-ship. Fine-grained, per-action
+permission rules beyond that basic separation are deferred to Stretch.
+Which technology implements the login (Firebase Auth, DocuSign, or
+custom) remains a separate, still-open sandbox experiment.
+**Alternatives considered:** Merging Admin and Staff into one login
+for the MVP to save time — superseded by the team's own MVP.md, which
+treats the 3-way split as foundational rather than optional.

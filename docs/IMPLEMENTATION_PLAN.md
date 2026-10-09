@@ -20,6 +20,25 @@ Scope for the November deadline: **one visa type only — Student visa**
 goals** (built only if time allows; otherwise presented as future
 work, not left as unfinished code).
 
+## Sandbox experiments (advisor-directed, pre-Phase-1)
+
+Per Henry (project advisor, per docs/MEETING.md 2026-09-29): validate
+these on separate git branches before committing to main. Throwaway
+code is fine; log results in docs/MEETING.md's experiment table. These
+feed the open questions in Phase 1/2 below.
+
+- [ ] Sandbox branch workflow set up
+- [ ] DocuSign ecosystem — what it covers vs. doesn't, vs. our
+      differentiator (one intake → all IRCC forms + RCIC approval)
+- [ ] Own login system w/ roles (Client/RCIC/Admin) vs. DocuSign
+- [ ] File storage: cloud drive API vs. AWS S3 — upload + per-user
+      access restriction, free-tier limits
+- [ ] CRM research — which tables are actually needed (not adopting a
+      full open-source CRM)
+- [ ] Headless framework choice — TBD, confirm with instructor
+- [ ] "Unique relationship" check (RCIC ↔ client) — meaning unclear,
+      confirm with instructor
+
 ## Phase 1 — Client accounts, visa-type checklist & intake questionnaire (data layer) — Must-ship
 
 - [ ] Define data model for clients, visa types, and required-document
@@ -28,11 +47,16 @@ work, not left as unfinished code).
       can be added later without a rewrite
 - [ ] Client authentication (client self-sign-up / log in / session
       handling) — external, client-facing app; not staff-provisioned
-      accounts. Planned to use Firebase Auth (per docs/DISCOVERY.md).
-      Open question: whether the rest of the data store (client
-      records, checklists, questionnaire responses, documents) also
-      lives in Firebase (Firestore/Storage) or elsewhere — not yet
-      decided
+      accounts. Candidate: Firebase Auth (per docs/DISCOVERY.md), but
+      this and the backend data store (Firebase vs. AWS S3 for files)
+      are pending the sandbox experiments above — not yet decided
+- [ ] Separate login/experience per role: Client, Staff, Admin (per
+      docs/MVP.md) — settled as Foundation scope, three distinct
+      logins, not merged. Fine-grained role-based permissions beyond
+      that basic separation are Stretch (see below). Which auth
+      provider implements this (Firebase vs. DocuSign vs. custom) is
+      still the sandbox experiment above — that's a technology
+      choice, not a role-count question anymore
 - [ ] Open question: how does a self-signed-up account get connected
       to its visa type and retainer-paid status, both of which are
       only known after a staff-run consultation happens beforehand?
@@ -53,9 +77,15 @@ work, not left as unfinished code).
       occupation) that replaces the old intake form; feeds the AI
       cross-check in Phase 2. Supports incremental/draft saves so
       client progress auto-saves and resumes exactly where they left
-      off (core to the questionnaire, not deferred)
+      off (core to the questionnaire, not deferred); sectioned into
+      smaller parts with a progress indicator (per docs/MVP.md)
+- [ ] Open question (per docs/MVP.md, marked "undecided" by the team):
+      conditional questions — should the questionnaire change or skip
+      questions based on earlier answers and visa type? Not yet
+      decided; plain linear questionnaire is the fallback if unresolved
 - [ ] API/route to fetch a logged-in client's checklist with each
-      item's status (not yet uploaded / uploaded / missing)
+      item's status (required / submitted / under review / changes
+      required / approved — per docs/MVP.md)
 - [ ] Minimal client-facing page listing their checklist (read-only,
       no upload yet), with a short static "why this is needed" note
       per checklist item — light version of the contextual-guidance
@@ -81,9 +111,20 @@ below.
       per Omar, this is the highest-value feature of the proposal.
       Scoped narrow for the demo: 1–2 document types (e.g. passport),
       not full coverage of every document in the checklist
-- [ ] RCIC review/approval UI — basic version: view the AI's flagged
-      report and approve/reject. Demonstrates the human-in-the-loop
-      guardrail that's central to the whole pitch; polish is stretch
+- [ ] Staff review/approval UI — basic version: view the AI's flagged
+      report and approve/reject. In the real process
+      (docs/CURRENT_USER_FLOW_V2.md), Admin triages flagged items
+      first and Consultant/RCIC gives final approval — now built as
+      the Staff and Admin logins settled in Phase 1. Demonstrates the
+      human-in-the-loop guardrail central to the pitch; polish is
+      stretch
+- [ ] Document resubmission flow: client can replace a document after
+      staff marks it "changes required" (per docs/MVP.md)
+- [ ] Contextual staff feedback: staff can leave a comment on a
+      specific document/question when requesting changes, visible to
+      the client (per docs/MVP.md) — a light per-item comment tied to
+      the resubmission flow above, not a general two-way messaging
+      system (that stays out of scope, see Stretch goals)
 - [ ] Status field in-product that RCIC updates after manually
       checking IRCC's portal (per original spec — automating this
       check itself is not yet decided). Promoted from stretch per
@@ -112,14 +153,26 @@ below.
       checklist, not just the 1–2 scoped for the must-ship demo
 - [ ] Automated notifications/reminders (e.g. email/in-app nudge when
       a document is missing or flagged) — marked P1/Important in
-      competitive analysis (docs/COMPETITVE.md); not currently in any
-      must-ship item
+      competitive analysis (docs/COMPETITVE.md) and listed as "Later"
+      in docs/MVP.md; not currently in any must-ship item. Two
+      concrete triggers requested by Jean, to implement here if time
+      allows:
+      - Inactivity reminder: no documents uploaded within 7–10 (or 15)
+        days of the onboarding email → follow-up email to the client
+      - Upload receipt confirmation: instant email listing files
+        received, noting an RCIC will review them
 
 ## Stretch goals (beyond Phase 2)
 
+- Fine-grained role-based permissions (beyond the basic separate
+  Client/Staff/Admin logins already in Phase 1 must-ship — per
+  docs/MVP.md)
+- Staff dashboard (per docs/MVP.md)
+- Search and filtering (per docs/MVP.md)
 - Richer client progress dashboard (beyond the simple status view
   promoted into Phase 2 must-ship above)
-- In-portal communication channel (reduce email back-and-forth)
+- General two-way in-portal communication channel (beyond the
+  per-item staff feedback already in Phase 2 must-ship)
 - Support for additional visa types beyond the single MVP one
 - Zoho CRM/Drive integration, if/when the standalone decision is
   revisited
