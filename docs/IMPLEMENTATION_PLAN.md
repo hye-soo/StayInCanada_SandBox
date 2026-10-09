@@ -30,13 +30,19 @@ feed the open questions in Phase 1/2 below.
 - [x] Sandbox branch workflow set up
 - [ ] DocuSign ecosystem — what it covers vs. doesn't, vs. our
       differentiator (one intake → all IRCC forms + RCIC approval)
-- [ ] Own login system w/ roles (Client/RCIC/Admin) vs. DocuSign
+- [ ] Own login system w/ roles (Client/RCIC/Admin) vs. DocuSign — note:
+      a sandbox prototype (branch hye-sandbox-v1) validated the *role
+      structure* itself (Admin vs. RCIC, see docs/DECISIONS.md
+      2026-10-08) using a hardcoded mock identity; which technology
+      implements real login/sessions is still fully open
 - [ ] File storage: cloud drive API vs. AWS S3 — upload + per-user
       access restriction, free-tier limits
 - [ ] CRM research — which tables are actually needed (not adopting a
       full open-source CRM)
 - [x] Headless framework choice — shadcn + Base UI, validated via the
-      checklist page experiment
+      checklist page experiment, then further validated building the
+      full hye-sandbox-v1 prototype (Badge, Card, Textarea, Button all
+      used in a working Next.js 16/React 19 app)
 - [ ] "Unique relationship" check (RCIC ↔ client) — meaning unclear,
       confirm with instructor
 
@@ -51,13 +57,17 @@ feed the open questions in Phase 1/2 below.
       accounts. Candidate: Firebase Auth (per docs/DISCOVERY.md), but
       this and the backend data store (Firebase vs. AWS S3 for files)
       are pending the sandbox experiments above — not yet decided
-- [ ] Separate login/experience per role: Client, Staff, Admin (per
-      docs/MVP.md) — settled as Foundation scope, three distinct
-      logins, not merged. Fine-grained role-based permissions beyond
-      that basic separation are Stretch (see below). Which auth
-      provider implements this (Firebase vs. DocuSign vs. custom) is
-      still the sandbox experiment above — that's a technology
-      choice, not a role-count question anymore
+- [ ] Separate login/experience per role: Client, Admin, RCIC (per
+      docs/MVP.md's 3-role Foundation scope, concretized by the
+      hye-sandbox-v1 prototype and docs/CURRENT_USER_FLOW_V2.md — not
+      generic "Staff"). Admin only triages/forwards items and never
+      sets client-facing status or comments; RCIC is the sole gate to
+      the client (approve or request changes) — see docs/DECISIONS.md
+      2026-10-08. Fine-grained role-based permissions beyond this
+      basic separation are Stretch (see below). Which auth provider
+      implements this (Firebase vs. DocuSign vs. custom) is still the
+      sandbox experiment above — that's a technology choice, not a
+      role-count or role-behavior question anymore
 - [ ] Open question: how does a self-signed-up account get connected
       to its visa type and retainer-paid status, both of which are
       only known after a staff-run consultation happens beforehand?
@@ -86,7 +96,9 @@ feed the open questions in Phase 1/2 below.
       decided; plain linear questionnaire is the fallback if unresolved
 - [ ] API/route to fetch a logged-in client's checklist with each
       item's status (required / submitted / under review / changes
-      required / approved — per docs/MVP.md)
+      required / approved — per docs/MVP.md). All 5 states and their
+      transitions were exercised end-to-end in the hye-sandbox-v1
+      prototype (mock data) — data model confirmed workable
 - [ ] Minimal client-facing page listing their checklist (read-only,
       no upload yet), with a short static "why this is needed" note
       per checklist item — light version of the contextual-guidance
@@ -112,20 +124,25 @@ below.
       per Omar, this is the highest-value feature of the proposal.
       Scoped narrow for the demo: 1–2 document types (e.g. passport),
       not full coverage of every document in the checklist
-- [ ] Staff review/approval UI — basic version: view the AI's flagged
-      report and approve/reject. In the real process
-      (docs/CURRENT_USER_FLOW_V2.md), Admin triages flagged items
-      first and Consultant/RCIC gives final approval — now built as
-      the Staff and Admin logins settled in Phase 1. Demonstrates the
-      human-in-the-loop guardrail central to the pitch; polish is
-      stretch
+- [ ] Admin review screen — view the AI's flagged report (plus a mock
+      AI-suggested form-entry preview, see docs/DECISIONS.md
+      2026-10-08) and forward to RCIC, with an optional internal note
+      (visible to RCIC only, never to the client). Admin has no
+      approve/request-changes power of its own — validated structure,
+      see docs/DECISIONS.md 2026-10-08
+- [ ] RCIC review/approval screen — the sole gate to the client: view
+      items Admin forwarded (AI report, form-entry preview, Admin's
+      note) and either approve or request changes with a comment.
+      Demonstrates the human-in-the-loop guardrail central to the
+      pitch; polish is stretch
 - [ ] Document resubmission flow: client can replace a document after
-      staff marks it "changes required" (per docs/MVP.md)
-- [ ] Contextual staff feedback: staff can leave a comment on a
-      specific document/question when requesting changes, visible to
-      the client (per docs/MVP.md) — a light per-item comment tied to
-      the resubmission flow above, not a general two-way messaging
-      system (that stays out of scope, see Stretch goals)
+      RCIC marks it "changes required" (per docs/MVP.md)
+- [ ] Contextual client-facing feedback: RCIC can leave a comment
+      visible to the client when requesting changes (per docs/MVP.md)
+      — a light per-item comment tied to the resubmission flow above,
+      not a general two-way messaging system (that stays out of
+      scope, see Stretch goals). Admin's internal note to RCIC above
+      is separate and never reaches the client.
 - [ ] Status field in-product that RCIC updates after manually
       checking IRCC's portal (per original spec — automating this
       check itself is not yet decided). Promoted from stretch per
@@ -149,7 +166,10 @@ below.
       docs/DECISIONS.md 2026-09-29)
 - [ ] AI auto-fill of the relevant government form (e.g. Client
       Information Form) from submitted documents — contingent on the
-      research spike above
+      research spike above. The sandbox's mock AI-suggested
+      form-entry preview (docs/DECISIONS.md 2026-10-08) is a static
+      demo/pitch aid only — it does not resolve this spike's
+      feasibility question
 - [ ] Full AI cross-check coverage across every document type in the
       checklist, not just the 1–2 scoped for the must-ship demo
 - [ ] Automated notifications/reminders (e.g. email/in-app nudge when
@@ -166,14 +186,14 @@ below.
 ## Stretch goals (beyond Phase 2)
 
 - Fine-grained role-based permissions (beyond the basic separate
-  Client/Staff/Admin logins already in Phase 1 must-ship — per
+  Client/Admin/RCIC logins already in Phase 1 must-ship — per
   docs/MVP.md)
-- Staff dashboard (per docs/MVP.md)
+- Admin/RCIC dashboard (per docs/MVP.md's "Staff dashboard")
 - Search and filtering (per docs/MVP.md)
 - Richer client progress dashboard (beyond the simple status view
   promoted into Phase 2 must-ship above)
 - General two-way in-portal communication channel (beyond the
-  per-item staff feedback already in Phase 2 must-ship)
+  per-item RCIC feedback already in Phase 2 must-ship)
 - Support for additional visa types beyond the single MVP one
 - Zoho CRM/Drive integration, if/when the standalone decision is
   revisited

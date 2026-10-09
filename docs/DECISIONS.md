@@ -135,3 +135,45 @@ custom) remains a separate, still-open sandbox experiment.
 **Alternatives considered:** Merging Admin and Staff into one login
 for the MVP to save time — superseded by the team's own MVP.md, which
 treats the 3-way split as foundational rather than optional.
+
+## 2026-10-08 — Concrete Admin/RCIC split, validated via sandbox prototype
+**Context:** The 2026-10-08 "three separate logins" decision above
+settled on Client/Staff/Admin generically, without pinning down what
+"Staff" actually does or how it divides from Admin. docs/CURRENT_USER_FLOW_V2.md
+documents Admin (checks documents, flags issues, fills forms, submits)
+and Consultant/RCIC (sole contact with the client, final approval) as
+distinct roles that never overlap — Admin never talks to the client in
+either branch of the real flow. A clickable sandbox prototype (branch
+hye-sandbox-v1, mock data only) built and exercised this exact split
+end to end.
+**Decision:** Replace generic "Staff" with two concrete roles, Admin
+and RCIC. Admin's only action is forwarding a reviewed item to RCIC,
+with an optional internal note (visible to RCIC only); Admin never
+sets client-facing status or comments. RCIC is the sole gate to the
+client, with both approve and request-changes actions. This structure
+is now validated by a working (mock) implementation, not just a
+flowchart reading.
+**Alternatives considered:** Giving Admin its own explicit "flag as
+incomplete" vs. "forward as clean" decision, literally mirroring the
+real-world process's two branches — simplified instead to Admin always
+forwarding (with optional context via the note) and letting RCIC make
+the single final call either way, since the product's stated goal is
+collapsing scattered back-and-forth communication into one workspace,
+not replicating every manual hop of the current process.
+
+## 2026-10-08 — Mock AI form-suggestion preview is a demo aid, not a resolved feature
+**Context:** docs/CURRENT_USER_FLOW_V2.md's "Admin fills the IRCC
+application forms with verified information" step maps to the
+already-flagged IRCC PDF auto-fill stretch goal (2026-09-29 decision),
+whose feasibility is still unresolved. To make this step visible in
+the sandbox demo, a static mock "AI-suggested form entry" preview
+(hardcoded text, no real parsing) was added to the Admin and RCIC
+screens, clearly labeled "preview only, not a working auto-fill."
+**Decision:** Keep IRCC PDF auto-fill scoped as a stretch goal/research
+spike, unchanged. The sandbox's mock preview is a demo/pitch aid for
+visualizing the concept to stakeholders, not evidence toward resolving
+the feasibility question, and should not be read as "this stretch goal
+is now built."
+**Alternatives considered:** Treating the mock preview as validating
+the auto-fill feature — rejected; it is static hardcoded text with no
+real document parsing or form-field logic behind it.

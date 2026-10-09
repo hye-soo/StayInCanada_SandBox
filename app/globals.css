@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -39,6 +39,16 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-status-required: var(--status-required);
+  --color-status-required-foreground: var(--status-required-foreground);
+  --color-status-submitted: var(--status-submitted);
+  --color-status-submitted-foreground: var(--status-submitted-foreground);
+  --color-status-under-review: var(--status-under-review);
+  --color-status-under-review-foreground: var(--status-under-review-foreground);
+  --color-status-changes-required: var(--status-changes-required);
+  --color-status-changes-required-foreground: var(--status-changes-required-foreground);
+  --color-status-approved: var(--status-approved);
+  --color-status-approved-foreground: var(--status-approved-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -81,6 +91,20 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Status badge tokens: light tint bg + dark shade text (Tailwind
+     palette, same shade pair per colour as dark mode uses, mirrored).
+     Verified >= 4.5:1 contrast — see docs/PHASE1_SLICE_A.md. */
+  --status-required: oklch(0.962 0.059 95.617); /* amber-100 */
+  --status-required-foreground: oklch(0.279 0.077 45.635); /* amber-950 */
+  --status-submitted: oklch(0.932 0.032 255.585); /* blue-100 */
+  --status-submitted-foreground: oklch(0.282 0.091 267.935); /* blue-950 */
+  --status-under-review: oklch(0.943 0.029 294.588); /* violet-100 */
+  --status-under-review-foreground: oklch(0.283 0.141 291.089); /* violet-950 */
+  --status-changes-required: oklch(0.936 0.032 17.717); /* red-100 */
+  --status-changes-required-foreground: oklch(0.258 0.092 26.042); /* red-950 */
+  --status-approved: oklch(0.962 0.044 156.743); /* green-100 */
+  --status-approved-foreground: oklch(0.266 0.065 152.934); /* green-950 */
 }
 
 .dark {
@@ -115,6 +139,19 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Dark mode: shades swapped (dark tint bg + light text), same two
+     shades per colour as light mode, so contrast ratios match. */
+  --status-required: oklch(0.279 0.077 45.635); /* amber-950 */
+  --status-required-foreground: oklch(0.962 0.059 95.617); /* amber-100 */
+  --status-submitted: oklch(0.282 0.091 267.935); /* blue-950 */
+  --status-submitted-foreground: oklch(0.932 0.032 255.585); /* blue-100 */
+  --status-under-review: oklch(0.283 0.141 291.089); /* violet-950 */
+  --status-under-review-foreground: oklch(0.943 0.029 294.588); /* violet-100 */
+  --status-changes-required: oklch(0.258 0.092 26.042); /* red-950 */
+  --status-changes-required-foreground: oklch(0.936 0.032 17.717); /* red-100 */
+  --status-approved: oklch(0.266 0.065 152.934); /* green-950 */
+  --status-approved-foreground: oklch(0.962 0.044 156.743); /* green-100 */
 }
 
 @layer base {
