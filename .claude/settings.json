@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3000/staff -o /tmp/staff2.html -w \"HTTP %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:3000/checklist/statement-of-purpose -o /tmp/sop.html -w \"HTTP %{http_code}\\\\n\")",
+      "Bash(git mv *)"
+    ]
+  }
+}
