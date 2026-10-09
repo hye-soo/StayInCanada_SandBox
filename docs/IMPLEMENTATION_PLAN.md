@@ -20,7 +20,7 @@ Scope for the November deadline: **one visa type only — Student visa**
 goals** (built only if time allows; otherwise presented as future
 work, not left as unfinished code).
 
-## Sandbox experiments (advisor-directed, pre-Phase-1)
+## Sandbox experiments (advisor-directed, ongoing)
 
 Per Henry (project advisor, per docs/MEETING.md 2026-09-29): validate
 these on separate git branches before committing to main. Throwaway
