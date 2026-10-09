@@ -27,7 +27,7 @@ these on separate git branches before committing to main. Throwaway
 code is fine; log results in docs/MEETING.md's experiment table. These
 feed the open questions in Phase 1/2 below.
 
-- [ ] Sandbox branch workflow set up
+- [x] Sandbox branch workflow set up
 - [ ] DocuSign ecosystem — what it covers vs. doesn't, vs. our
       differentiator (one intake → all IRCC forms + RCIC approval)
 - [ ] Own login system w/ roles (Client/RCIC/Admin) vs. DocuSign
@@ -35,7 +35,8 @@ feed the open questions in Phase 1/2 below.
       access restriction, free-tier limits
 - [ ] CRM research — which tables are actually needed (not adopting a
       full open-source CRM)
-- [ ] Headless framework choice — TBD, confirm with instructor
+- [x] Headless framework choice — shadcn + Base UI, validated via the
+      checklist page experiment
 - [ ] "Unique relationship" check (RCIC ↔ client) — meaning unclear,
       confirm with instructor
 
