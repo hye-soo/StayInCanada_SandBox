@@ -35,7 +35,7 @@ feed the open questions in Phase 1/2 below.
       access restriction, free-tier limits
 - [ ] CRM research — which tables are actually needed (not adopting a
       full open-source CRM)
-- [ ] Headless framework choice — TBD, confirm with instructor
+- [ ] Headless framework choice — chosen (shadcn + Base UI), validation pending
 - [ ] "Unique relationship" check (RCIC ↔ client) — meaning unclear,
       confirm with instructor
 
