@@ -1,4 +1,4 @@
-import { getCurrentClientItemsByStatus } from "@/lib/get-current-client-checklist.ts";
+import { getChecklistStore } from "@/lib/checklist-store.ts";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -10,14 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { approveItem, requestChanges } from "./actions.ts";
+import { requireRole } from "@/lib/firebase/session.ts";
 
 export default async function RcicPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  await requireRole(["rcic"]);
   const { error } = await searchParams;
-  const items = getCurrentClientItemsByStatus("under_review");
+  // RCIC sees items across every client, not just one.
+  const items = getChecklistStore().getAllItemsByStatus("under_review");
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-16">
@@ -27,19 +30,20 @@ export default async function RcicPage({
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nothing is waiting on RCIC review.</p>
       ) : (
-        items.map((item) => (
-          <Card key={item.id}>
+        items.map(({ clientId, item }) => (
+          <Card key={`${clientId}-${item.id}`}>
             <CardHeader>
               <CardTitle>{item.label}</CardTitle>
               <CardDescription>
-                Uploaded: {item.fileName} ({Math.round((item.fileSize ?? 0) / 1024)} KB)
+                Client {clientId} — Uploaded: {item.fileName} (
+                {Math.round((item.fileSize ?? 0) / 1024)} KB)
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               {item.aiReport ? (
                 <div className="rounded-[var(--radius-md)] border border-border bg-muted/50 p-3">
                   <p className="text-xs font-medium text-muted-foreground">
-                    AI suggestion, pending staff review
+                    AI suggestion, pending RCIC review
                   </p>
                   <p className="mt-1 text-sm">{item.aiReport}</p>
                 </div>
@@ -63,7 +67,10 @@ export default async function RcicPage({
                 </div>
               ) : null}
 
-              <form action={requestChanges.bind(null, item.id)} className="flex flex-col gap-2">
+              <form
+                action={requestChanges.bind(null, clientId, item.id)}
+                className="flex flex-col gap-2"
+              >
                 <Textarea
                   name="comment"
                   placeholder="What needs to change?"
@@ -76,7 +83,7 @@ export default async function RcicPage({
               </form>
             </CardContent>
             <CardFooter>
-              <form action={approveItem.bind(null, item.id)}>
+              <form action={approveItem.bind(null, clientId, item.id)}>
                 <Button type="submit">Approve</Button>
               </form>
             </CardFooter>

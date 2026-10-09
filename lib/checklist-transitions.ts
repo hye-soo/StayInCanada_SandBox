@@ -42,7 +42,7 @@ export function transitionChecklistItem(
           fileSize: action.file.size,
           aiReport: MOCK_AI_REPORT,
           aiFormSuggestion: MOCK_AI_FORM_SUGGESTION,
-          staffComment: undefined,
+          rcicComment: undefined,
         },
       };
     }
@@ -56,7 +56,7 @@ export function transitionChecklistItem(
       return { item: { ...item, status: "approved" } };
     case "request_changes":
       return {
-        item: { ...item, status: "changes_required", staffComment: action.comment },
+        item: { ...item, status: "changes_required", rcicComment: action.comment },
       };
   }
 }

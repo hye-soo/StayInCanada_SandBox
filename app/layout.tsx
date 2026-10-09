@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { AuthProvider } from "@/lib/firebase/auth-context.tsx";
+import { AuthStatus } from "@/components/auth-status.tsx";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,23 +27,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3">
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link href="/checklist" className="hover:underline">
-              Client
+        <AuthProvider>
+          <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3">
+            <Link href="/checklist" className="text-sm font-medium hover:underline">
+              StayinCanada (sandbox)
             </Link>
-            <Link href="/admin" className="hover:underline">
-              Admin
-            </Link>
-            <Link href="/rcic" className="hover:underline">
-              RCIC
-            </Link>
-          </nav>
-          <span className="text-xs text-muted-foreground">
-            Demo only — not real login
-          </span>
-        </header>
-        {children}
+            <AuthStatus />
+          </header>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

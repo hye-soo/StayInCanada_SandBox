@@ -41,13 +41,13 @@ test("upload over the size limit is rejected and leaves the item unchanged", () 
 });
 
 test("upload clears any previous staff comment", () => {
-  const item = makeItem({ status: "changes_required", staffComment: "fix the date" });
+  const item = makeItem({ status: "changes_required", rcicComment: "fix the date" });
   const result = transitionChecklistItem(item, {
     type: "upload",
     file: { name: "passport.pdf", size: 1024 },
   });
 
-  assert.equal(result.item?.staffComment, undefined);
+  assert.equal(result.item?.rcicComment, undefined);
 });
 
 test("mark_reviewed forwards a submitted item to RCIC (under_review)", () => {
@@ -79,5 +79,5 @@ test("request_changes sets the status and stores the comment", () => {
     comment: "Spelling mismatch on page 1.",
   });
   assert.equal(result.item?.status, "changes_required");
-  assert.equal(result.item?.staffComment, "Spelling mismatch on page 1.");
+  assert.equal(result.item?.rcicComment, "Spelling mismatch on page 1.");
 });

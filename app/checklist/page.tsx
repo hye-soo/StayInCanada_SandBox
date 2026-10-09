@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { getCurrentClientChecklist } from "@/lib/get-current-client-checklist.ts";
+import { getClientChecklist } from "@/lib/client-checklist.ts";
 import { STATUS_BADGE_CLASS, STATUS_LABEL } from "@/lib/status-display.ts";
 import { Badge } from "@/components/ui/badge";
+import { requireRole } from "@/lib/firebase/session.ts";
 
-export default function ChecklistPage() {
-  const { items } = getCurrentClientChecklist();
+export default async function ChecklistPage() {
+  const { uid } = await requireRole(["client"]);
+  const { items } = getClientChecklist(uid);
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-16">

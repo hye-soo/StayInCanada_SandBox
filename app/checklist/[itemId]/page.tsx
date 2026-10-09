@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCurrentClientChecklistItem } from "@/lib/get-current-client-checklist.ts";
+import { getClientChecklistItem } from "@/lib/client-checklist.ts";
 import { STATUS_BADGE_CLASS, STATUS_LABEL, STATUS_NEXT_STEP } from "@/lib/status-display.ts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { uploadMockFile } from "./actions.ts";
+import { requireRole } from "@/lib/firebase/session.ts";
 
 export default async function ChecklistItemPage({
   params,
@@ -20,9 +21,10 @@ export default async function ChecklistItemPage({
   params: Promise<{ itemId: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
+  const { uid } = await requireRole(["client"]);
   const { itemId } = await params;
   const { error } = await searchParams;
-  const item = getCurrentClientChecklistItem(itemId);
+  const item = getClientChecklistItem(uid, itemId);
   if (!item) notFound();
 
   const canUpload = item.status === "required" || item.status === "changes_required";
@@ -57,10 +59,10 @@ export default async function ChecklistItemPage({
             </div>
           ) : null}
 
-          {item.staffComment ? (
+          {item.rcicComment ? (
             <div className="rounded-[var(--radius-md)] border border-border p-3">
               <p className="text-xs font-medium text-muted-foreground">Staff comment</p>
-              <p className="mt-1 text-sm">{item.staffComment}</p>
+              <p className="mt-1 text-sm">{item.rcicComment}</p>
             </div>
           ) : null}
 

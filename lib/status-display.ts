@@ -9,7 +9,10 @@ export const STATUS_LABEL: Record<ChecklistItemStatus, string> = {
 };
 
 export interface StatusNextStep {
-  whoseTurn: "client" | "staff" | "none";
+  // "rcic" here means "the company side" internally — client-facing
+  // copy (whatHappensNext, and the page's own display mapping) stays
+  // worded as "Staff" deliberately, so clients never see org structure.
+  whoseTurn: "client" | "rcic" | "none";
   whatHappensNext: string;
 }
 
@@ -19,11 +22,11 @@ export const STATUS_NEXT_STEP: Record<ChecklistItemStatus, StatusNextStep> = {
     whatHappensNext: "Upload this document to continue.",
   },
   submitted: {
-    whoseTurn: "staff",
+    whoseTurn: "rcic",
     whatHappensNext: "Staff will review what you submitted.",
   },
   under_review: {
-    whoseTurn: "staff",
+    whoseTurn: "rcic",
     whatHappensNext: "Staff is currently reviewing this document.",
   },
   changes_required: {

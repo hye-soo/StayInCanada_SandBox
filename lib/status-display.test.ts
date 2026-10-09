@@ -33,7 +33,7 @@ test("badge classes reference the status's own bg and foreground tokens", () => 
 });
 
 test("every status has a next-step entry with a valid whoseTurn", () => {
-  const validTurns = new Set(["client", "staff", "none"]);
+  const validTurns = new Set(["client", "rcic", "none"]);
   for (const status of ALL_STATUSES) {
     const nextStep = STATUS_NEXT_STEP[status];
     assert.ok(nextStep, `missing next-step entry for ${status}`);

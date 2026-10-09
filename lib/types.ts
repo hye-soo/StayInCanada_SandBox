@@ -1,7 +1,7 @@
 // ponytail: single visa type for the MVP; widen when more are added
 export type VisaType = "student";
 
-export type UserRole = "client" | "staff" | "admin";
+export type UserRole = "client" | "rcic" | "admin";
 
 export interface AppUser {
   id: string;
@@ -40,5 +40,5 @@ export interface ChecklistItem {
   // client directly — see docs/CURRENT_USER_FLOW_V2.md).
   adminNote?: string;
   // Set by RCIC when requesting changes.
-  staffComment?: string;
+  rcicComment?: string;
 }
