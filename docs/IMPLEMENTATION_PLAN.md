@@ -331,35 +331,35 @@ question (how a self-signed-up account connects to a visa type) via
 real invite-gated signup. Scope deliberately narrower than the
 wireframe in places — see docs/DECISIONS.md for what was cut and why.
 
-- [ ] lib/invite-store.ts: in-memory invite store (token, email,
+- [x] lib/invite-store.ts: in-memory invite store (token, email,
       createdAt, usedAt?) + `isInviteValid()`, same Map-per-token
       pattern as the other stores. Token via `node:crypto`'s
       `randomUUID()` — no new dependency
-- [ ] app/admin/invitations/page.tsx + actions.ts: Admin enters a
+- [x] app/admin/invitations/page.tsx + actions.ts: Admin enters a
       client email, gets a shareable `/invite/[token]` link back.
       Simplified from the wireframe: no RCIC-roster/admin-assignment/
       retainer-checkbox fields (no data model for any of those exists)
-- [ ] app/invite/[token]/page.tsx: public route, validates the token,
+- [x] app/invite/[token]/page.tsx: public route, validates the token,
       shows a signup form pre-filled with the invited email on
       success, or an error if invalid/already used
-- [ ] app/signup/page.tsx: remove the open self-serve form — signup
+- [x] app/signup/page.tsx: remove the open self-serve form — signup
       now only happens through a valid invite link
-- [ ] lib/client-directory.ts: add `getAdminOverviewStats()`,
+- [x] lib/client-directory.ts: add `getAdminOverviewStats()`,
       `getRcicOverviewStats()`, and `getNeedsAttentionRows()` — pure
       aggregation over existing checklist data, same pattern as
       getAllClientSummaries()
-- [ ] app/admin/page.tsx: new Overview (stat cards, needs-attention
+- [x] app/admin/page.tsx: new Overview (stat cards, needs-attention
       table, handoff callout, action buttons linking to
       /admin/clients and /admin/invitations)
-- [ ] app/admin/clients/page.tsx: existing client list moved here,
+- [x] app/admin/clients/page.tsx: existing client list moved here,
       upgraded with search + status filter (per the wireframe).
       Skips the "Application type" filter (single visa type) and
       "Assigned to me" toggle (no per-admin assignment model)
-- [ ] app/rcic/page.tsx: equivalent Overview for RCIC (own stats:
+- [x] app/rcic/page.tsx: equivalent Overview for RCIC (own stats:
       active clients, awaiting RCIC review, changes requested, ready
       to submit; handoff callout per docs/CURRENT_USER_FLOW_V2.md's
       RCIC role)
-- [ ] app/rcic/clients/page.tsx: same client-list pattern as Admin's
+- [x] app/rcic/clients/page.tsx: same client-list pattern as Admin's
 
 ## Stretch goals (beyond Phase 2)
 
