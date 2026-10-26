@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { applyChecklistAction } from "@/lib/apply-checklist-action.ts";
+import { applySubmissionAction } from "@/lib/apply-submission-action.ts";
 import { requireRole } from "@/lib/firebase/session.ts";
 
 // RCIC is the sole interface to the client for both outcomes —
@@ -22,6 +23,22 @@ export async function approveItem(clientId: string, itemId: string) {
   }
 
   refreshViews(clientId, itemId);
+  redirect(`/rcic/${clientId}`);
+}
+
+// Phase 5 (docs/OUR_USER_FLOW.md): the flow's FINISH — RCIC sends the
+// packaged application to IRCC.
+export async function sendToIrcc(clientId: string) {
+  await requireRole(["rcic"]);
+  const result = applySubmissionAction(clientId, { type: "mark_submitted" });
+
+  if (result.error) {
+    redirect(`/rcic/${clientId}?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath(`/rcic/${clientId}`);
+  revalidatePath(`/admin/${clientId}`);
+  revalidatePath("/dashboard");
   redirect(`/rcic/${clientId}`);
 }
 

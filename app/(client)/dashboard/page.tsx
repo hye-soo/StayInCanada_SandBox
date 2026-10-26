@@ -8,7 +8,8 @@ import {
 import { getSectionStatus } from "@/lib/questionnaire-progress.ts";
 import { SECTION_LABELS } from "@/lib/questionnaire-fields.ts";
 import { getClientProfile } from "@/lib/client-profile.ts";
-import { getApplicationStage } from "@/lib/application-stage.ts";
+import { getDashboardStage } from "@/lib/application-stage.ts";
+import { getApplicationSubmissionStore } from "@/lib/application-submission-store.ts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,7 +49,8 @@ export default async function DashboardPage() {
   ).length;
   const approved = items.filter((item) => item.status === "approved").length;
 
-  const stage = getApplicationStage(items);
+  const submissionState = getApplicationSubmissionStore().getState(uid);
+  const stage = getDashboardStage(items, submissionState);
   const latestFeedbackItem = items.find((item) => item.rcicComment);
 
   return (

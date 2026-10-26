@@ -36,7 +36,12 @@ export default async function QuestionnairePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-16">
-      <h1 className="text-2xl font-semibold tracking-tight">Client Information Form</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Client Information Form</h1>
+        <Link href="/questionnaire/summary" className="text-sm text-muted-foreground hover:underline">
+          View / download summary
+        </Link>
+      </div>
 
       <Progress value={(completeCount / sectionIds.length) * 100}>
         <ProgressLabel>

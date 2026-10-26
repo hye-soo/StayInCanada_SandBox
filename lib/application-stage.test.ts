@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { getApplicationStage } from "./application-stage.ts";
+import { getApplicationStage, getDashboardStage } from "./application-stage.ts";
 import type { ChecklistItem } from "./types.ts";
 
 function item(status: ChecklistItem["status"]): ChecklistItem {
@@ -38,4 +38,19 @@ test("every item approved means ready for submission", () => {
 
 test("an empty checklist defaults to gathering information", () => {
   assert.equal(getApplicationStage([]).stage, "gathering_information");
+});
+
+test("getDashboardStage falls back to the checklist-derived stage when submission is still 'ready'", () => {
+  const items = [item("approved"), item("required")];
+  assert.equal(getDashboardStage(items, "ready").stage, "gathering_information");
+});
+
+test("getDashboardStage overrides the label once Admin has packaged the file", () => {
+  const info = getDashboardStage([item("approved")], "packaged");
+  assert.match(info.label, /packaged/i);
+});
+
+test("getDashboardStage overrides the label once RCIC has submitted to IRCC", () => {
+  const info = getDashboardStage([item("approved")], "submitted_to_ircc");
+  assert.match(info.label, /ircc/i);
 });

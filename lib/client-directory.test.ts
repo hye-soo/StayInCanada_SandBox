@@ -14,6 +14,7 @@ test("a fresh client summary: all checklist items required, no questionnaire sec
   assert.equal(summary.questionnaireComplete, 0);
   assert.ok(summary.questionnaireTotal > 0);
   assert.equal(summary.stage.stage, "gathering_information");
+  assert.equal(summary.submissionState, "ready");
 });
 
 test("checklistCounts reflects updated item statuses", () => {

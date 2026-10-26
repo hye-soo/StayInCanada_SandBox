@@ -4,6 +4,8 @@ import { getClientQuestionnaire } from "./client-questionnaire.ts";
 import { getSectionStatus } from "./questionnaire-progress.ts";
 import { SECTION_LABELS } from "./questionnaire-fields.ts";
 import { getApplicationStage, type ApplicationStageInfo } from "./application-stage.ts";
+import { getApplicationSubmissionStore } from "./application-submission-store.ts";
+import type { SubmissionState } from "./application-submission-transitions.ts";
 import type { ChecklistItemStatus, QuestionnaireSectionId, VisaType } from "./types.ts";
 
 export interface ClientSummary {
@@ -14,6 +16,7 @@ export interface ClientSummary {
   questionnaireTotal: number;
   checklistCounts: Record<ChecklistItemStatus, number>;
   stage: ApplicationStageInfo;
+  submissionState: SubmissionState;
 }
 
 const SECTION_IDS = Object.keys(SECTION_LABELS) as QuestionnaireSectionId[];
@@ -46,6 +49,7 @@ export function getClientSummary(clientId: string): ClientSummary {
     questionnaireTotal: SECTION_IDS.length,
     checklistCounts,
     stage: getApplicationStage(items),
+    submissionState: getApplicationSubmissionStore().getState(clientId),
   };
 }
 

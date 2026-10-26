@@ -16,7 +16,7 @@ export default async function ClientLayout({ children }: { children: React.React
 
   return (
     <div className="flex flex-1">
-      <aside className="flex w-56 shrink-0 flex-col gap-4 border-r border-border px-6 py-8">
+      <aside className="flex w-56 shrink-0 flex-col gap-4 border-r border-border px-6 py-8 print:hidden">
         <div>
           <p className="text-xs font-medium text-muted-foreground">MY APPLICATION</p>
           <nav className="mt-2 flex flex-col gap-1">

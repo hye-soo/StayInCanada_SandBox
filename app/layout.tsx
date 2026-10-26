@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3">
+          <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3 print:hidden">
             <Link href="/dashboard" className="text-sm font-medium hover:underline">
               StayinCanada (sandbox)
             </Link>

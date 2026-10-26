@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { applyChecklistAction } from "@/lib/apply-checklist-action.ts";
+import { applySubmissionAction } from "@/lib/apply-submission-action.ts";
 import { requireRole } from "@/lib/firebase/session.ts";
 
 // Admin's only action: forward to RCIC, with an optional internal note
@@ -21,5 +22,21 @@ export async function forwardToRcic(clientId: string, itemId: string, formData: 
 
   revalidatePath(`/admin/${clientId}`);
   revalidatePath(`/rcic/${clientId}`);
+  redirect(`/admin/${clientId}`);
+}
+
+// Phase 5 (docs/OUR_USER_FLOW.md): once every checklist item is
+// approved, Admin packages the file for RCIC's final review.
+export async function markPackageReady(clientId: string) {
+  await requireRole(["admin"]);
+  const result = applySubmissionAction(clientId, { type: "mark_packaged" });
+
+  if (result.error) {
+    redirect(`/admin/${clientId}?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath(`/admin/${clientId}`);
+  revalidatePath(`/rcic/${clientId}`);
+  revalidatePath("/dashboard");
   redirect(`/admin/${clientId}`);
 }

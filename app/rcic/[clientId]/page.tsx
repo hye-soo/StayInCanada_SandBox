@@ -1,12 +1,14 @@
 import { requireRole } from "@/lib/firebase/session.ts";
 import { getClientChecklist } from "@/lib/client-checklist.ts";
 import { getClientQuestionnaire } from "@/lib/client-questionnaire.ts";
+import { getClientSummary } from "@/lib/client-directory.ts";
 import { getSectionStatus } from "@/lib/questionnaire-progress.ts";
 import {
   SECTION_LABELS,
   SECTION_STATUS_BADGE_CLASS,
   SECTION_STATUS_LABEL,
 } from "@/lib/questionnaire-fields.ts";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { approveItem, requestChanges } from "./actions.ts";
+import { approveItem, requestChanges, sendToIrcc } from "./actions.ts";
 import type { QuestionnaireSectionId } from "@/lib/types.ts";
 
 export default async function RcicClientPage({
@@ -34,6 +36,7 @@ export default async function RcicClientPage({
   const { items } = getClientChecklist(clientId);
   const questionnaire = getClientQuestionnaire(clientId);
   const sectionIds = Object.keys(SECTION_LABELS) as QuestionnaireSectionId[];
+  const summary = getClientSummary(clientId);
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-16">
@@ -41,7 +44,15 @@ export default async function RcicClientPage({
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">Intake (read-only)</h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold">Intake (read-only)</h2>
+          <Link
+            href={`/rcic/${clientId}/summary`}
+            className="text-sm text-muted-foreground hover:underline"
+          >
+            View / download CIF summary
+          </Link>
+        </div>
         <ul className="flex flex-col gap-2">
           {sectionIds.map((sectionId) => {
             const status = getSectionStatus(questionnaire, sectionId);
@@ -122,6 +133,21 @@ export default async function RcicClientPage({
             ) : null}
           </Card>
         ))}
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Application preparation</h2>
+        {summary.submissionState === "packaged" ? (
+          <form action={sendToIrcc.bind(null, clientId)}>
+            <Button type="submit">Send to IRCC</Button>
+          </form>
+        ) : summary.submissionState === "submitted_to_ircc" ? (
+          <p className="text-sm text-muted-foreground">Submitted to IRCC. Application complete.</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Waiting on Admin to package the file.
+          </p>
+        )}
       </section>
     </main>
   );
