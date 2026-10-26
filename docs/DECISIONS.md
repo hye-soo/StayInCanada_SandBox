@@ -293,3 +293,34 @@ fake/static data — rejected as decorative complexity that misrepresents
 what the product can actually do; keeping `/signup` open alongside the
 new invite flow — rejected since that would leave the Phase 1 question
 unresolved in practice (two coexisting signup paths, only one real).
+
+## 2026-10-26 — RCIC validation/submission workflow rebuilt as a 5-state machine (Phase 4b/5)
+**Context:** A 4-screen wireframe for the RCIC side (requirements
+validation, final package review, submission recording, confirmation)
+showed a richer process than the 2-button ready->packaged->
+submitted_to_ircc flag built earlier: RCIC does one holistic
+"Validate & hand off" once Admin's per-item review is complete, Admin
+then prepares a versioned "package," RCIC gives that package its own
+final approval, and only then records the actual (manual, external)
+IRCC submission with real details (date, channel, reference, receipt).
+This also exposed a genuine question: does this holistic validation
+replace the per-item RCIC approve/request-changes built in Phase 4
+(docs/DECISIONS.md 2026-10-08), or sit alongside it?
+**Decision:** Per-item approve/request-changes stays exactly as built
+— it's still how an individual bad document gets flagged with
+specific feedback. The new holistic steps stack on top as a 5-state
+machine (awaiting_validation -> validated -> package_prepared ->
+approved_for_submission -> submitted_to_ircc), available once every
+item is already approved. The "package" Admin prepares is a
+lightweight mock record (version, preparer, timestamp) with static
+file-group content, not real document assembly — no real file storage
+or form generation exists to back a real one. The submission record
+(date, channel, IRCC reference, receipt filename) is real structured
+data, and each transition appends a human-readable entry to a new
+per-client activity log, matching the confirmation screen's timeline.
+**Alternatives considered:** Replacing per-item RCIC approve/reject
+with one bulk "Validate & hand off" action — rejected as a real
+functionality loss (no more per-document specific feedback) for a UI
+wireframe that most likely intended the holistic step as an addition,
+not a replacement; a real document-assembly "package" — rejected as
+over-scope given no file storage or form-generation exists yet.

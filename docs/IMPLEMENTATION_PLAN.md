@@ -361,6 +361,41 @@ wireframe in places — see docs/DECISIONS.md for what was cut and why.
       RCIC role)
 - [x] app/rcic/clients/page.tsx: same client-list pattern as Admin's
 
+## Phase 6 — RCIC validation/submission workflow (Phase 4b/5 rebuild) — Must-ship (for full-flow demo)
+
+Per a 4-screen RCIC workspace wireframe (requirements validation,
+final package review, submission recording, confirmation), replaces
+Phase 5's simple ready/packaged/submitted_to_ircc flag with a real
+5-state workflow. Per-item RCIC approve/request-changes (Phase 4) is
+unchanged — this stacks a holistic sign-off on top, it doesn't
+replace per-document review. See docs/DECISIONS.md 2026-10-26.
+
+- [x] lib/application-submission-transitions.ts: 5-state machine
+      (awaiting_validation -> validated -> package_prepared ->
+      approved_for_submission -> submitted_to_ircc), TDD
+- [x] lib/application-submission-store.ts: stores the full
+      ApplicationSubmission record (state, package, submission
+      record, last note), not just a bare state
+- [x] lib/activity-log-store.ts: append-only per-client activity log
+      for the confirmation screen's timeline, TDD
+- [x] lib/apply-submission-action.ts: orchestrates transitions +
+      activity log messages; keeps the "validate" precondition
+      (every checklist item approved), TDD
+- [x] lib/client-directory.ts: needsRcicValidation(),
+      needsPackageApproval(), needsSubmissionRecording() helpers for
+      the new list pages; RcicOverviewStats' "readyToSubmit" now
+      means approved_for_submission, not the old "packaged"
+- [x] /rcic/[clientId]/validation: single state-driven page rendering
+      whichever of the 4 wireframe screens applies
+- [x] /rcic/final-reviews and /rcic/applications: list pages,
+      replacing "Review queue" in RCIC's sidebar
+- [x] Admin's /admin/[clientId] "Application preparation" section
+      updated for the new states ("Prepare package" once validated)
+- [x] Client dashboard's stage card updated with new per-state copy
+- [ ] Real "Package" content (actual forms/evidence assembly, not the
+      current mock placeholder) — not built; no real file storage or
+      form generation exists yet (see Stretch goals)
+
 ## Stretch goals (beyond Phase 2)
 
 - Fine-grained role-based permissions (beyond the basic separate
