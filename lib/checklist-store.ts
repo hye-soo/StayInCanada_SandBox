@@ -8,6 +8,7 @@ export interface ChecklistStore {
   getAllItemsByStatus(
     status: ChecklistItemStatus
   ): { clientId: string; item: ChecklistItem }[];
+  getAllClientIds(): string[];
 }
 
 // Placeholder content for the single MVP visa type — confirm the real
@@ -87,6 +88,10 @@ class InMemoryChecklistStore implements ChecklistStore {
       }
     }
     return results;
+  }
+
+  getAllClientIds(): string[] {
+    return [...this.checklistsByClient.keys()];
   }
 }
 

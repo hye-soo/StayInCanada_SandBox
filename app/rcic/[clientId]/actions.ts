@@ -7,8 +7,8 @@ import { requireRole } from "@/lib/firebase/session.ts";
 
 // RCIC is the sole interface to the client for both outcomes —
 // see docs/CURRENT_USER_FLOW_V2.md.
-function refreshRcicAndClientViews(itemId: string) {
-  revalidatePath("/rcic");
+function refreshViews(clientId: string, itemId: string) {
+  revalidatePath(`/rcic/${clientId}`);
   revalidatePath("/checklist");
   revalidatePath(`/checklist/${itemId}`);
 }
@@ -18,11 +18,11 @@ export async function approveItem(clientId: string, itemId: string) {
   const result = applyChecklistAction(clientId, itemId, { type: "approve" });
 
   if (result.error) {
-    redirect(`/rcic?error=${encodeURIComponent(result.error)}`);
+    redirect(`/rcic/${clientId}?error=${encodeURIComponent(result.error)}`);
   }
 
-  refreshRcicAndClientViews(itemId);
-  redirect("/rcic");
+  refreshViews(clientId, itemId);
+  redirect(`/rcic/${clientId}`);
 }
 
 export async function requestChanges(clientId: string, itemId: string, formData: FormData) {
@@ -30,15 +30,17 @@ export async function requestChanges(clientId: string, itemId: string, formData:
   const comment = String(formData.get("comment") ?? "").trim();
 
   if (!comment) {
-    redirect(`/rcic?error=${encodeURIComponent("Add a comment before requesting changes.")}`);
+    redirect(
+      `/rcic/${clientId}?error=${encodeURIComponent("Add a comment before requesting changes.")}`
+    );
   }
 
   const result = applyChecklistAction(clientId, itemId, { type: "request_changes", comment });
 
   if (result.error) {
-    redirect(`/rcic?error=${encodeURIComponent(result.error)}`);
+    redirect(`/rcic/${clientId}?error=${encodeURIComponent(result.error)}`);
   }
 
-  refreshRcicAndClientViews(itemId);
-  redirect("/rcic");
+  refreshViews(clientId, itemId);
+  redirect(`/rcic/${clientId}`);
 }

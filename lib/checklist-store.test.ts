@@ -49,6 +49,16 @@ test("updateItem replaces the item's data in place", () => {
   assert.equal(updated?.fileName, "p.pdf");
 });
 
+test("getAllClientIds includes a client once their checklist is seeded, without duplicates", () => {
+  const store = getChecklistStore();
+  store.getChecklist("uid-list-1");
+  store.getChecklist("uid-list-1"); // second access, shouldn't duplicate
+
+  const ids = store.getAllClientIds();
+  const matches = ids.filter((id) => id === "uid-list-1");
+  assert.equal(matches.length, 1);
+});
+
 test("getAllItemsByStatus finds matching items across multiple clients", () => {
   const store = getChecklistStore();
 

@@ -16,10 +16,10 @@ export async function forwardToRcic(clientId: string, itemId: string, formData: 
   const result = applyChecklistAction(clientId, itemId, { type: "mark_reviewed", note });
 
   if (result.error) {
-    redirect(`/admin?error=${encodeURIComponent(result.error)}`);
+    redirect(`/admin/${clientId}?error=${encodeURIComponent(result.error)}`);
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/rcic");
-  redirect("/admin");
+  revalidatePath(`/admin/${clientId}`);
+  revalidatePath(`/rcic/${clientId}`);
+  redirect(`/admin/${clientId}`);
 }

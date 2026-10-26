@@ -1,95 +1,20 @@
-import { getChecklistStore } from "@/lib/checklist-store.ts";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { approveItem, requestChanges } from "./actions.ts";
+import { getAllClientSummaries } from "@/lib/client-directory.ts";
+import { ClientList } from "@/components/staff/client-list.tsx";
 import { requireRole } from "@/lib/firebase/session.ts";
 
-export default async function RcicPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default async function RcicPage() {
   await requireRole(["rcic"]);
-  const { error } = await searchParams;
-  // RCIC sees items across every client, not just one.
-  const items = getChecklistStore().getAllItemsByStatus("under_review");
+  const clients = getAllClientSummaries();
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-16">
-      <h1 className="text-2xl font-semibold tracking-tight">Forwarded for RCIC review</h1>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing is waiting on RCIC review.</p>
-      ) : (
-        items.map(({ clientId, item }) => (
-          <Card key={`${clientId}-${item.id}`}>
-            <CardHeader>
-              <CardTitle>{item.label}</CardTitle>
-              <CardDescription>
-                Client {clientId} — Uploaded: {item.fileName} (
-                {Math.round((item.fileSize ?? 0) / 1024)} KB)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {item.aiReport ? (
-                <div className="rounded-[var(--radius-md)] border border-border bg-muted/50 p-3">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    AI suggestion, pending RCIC review
-                  </p>
-                  <p className="mt-1 text-sm">{item.aiReport}</p>
-                </div>
-              ) : null}
-
-              {item.aiFormSuggestion ? (
-                <div className="rounded-[var(--radius-md)] border border-border bg-muted/50 p-3">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    AI-suggested form entry — preview only, not a working auto-fill
-                  </p>
-                  <p className="mt-1 text-sm">{item.aiFormSuggestion}</p>
-                </div>
-              ) : null}
-
-              {item.adminNote ? (
-                <div className="rounded-[var(--radius-md)] border border-border p-3">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Admin&apos;s internal note
-                  </p>
-                  <p className="mt-1 text-sm">{item.adminNote}</p>
-                </div>
-              ) : null}
-
-              <form
-                action={requestChanges.bind(null, clientId, item.id)}
-                className="flex flex-col gap-2"
-              >
-                <Textarea
-                  name="comment"
-                  placeholder="What needs to change?"
-                  required
-                  className="text-sm"
-                />
-                <Button type="submit" variant="outline" className="self-start">
-                  Request changes
-                </Button>
-              </form>
-            </CardContent>
-            <CardFooter>
-              <form action={approveItem.bind(null, clientId, item.id)}>
-                <Button type="submit">Approve</Button>
-              </form>
-            </CardFooter>
-          </Card>
-        ))
-      )}
+      <h1 className="text-2xl font-semibold tracking-tight">All Clients</h1>
+      <ClientList
+        clients={clients}
+        basePath="/rcic"
+        highlightStatus="under_review"
+        highlightLabel="awaiting RCIC review"
+      />
     </main>
   );
 }
