@@ -291,34 +291,34 @@ roles — the client's own progress indicator already surfaces missing
 sections, so no separate admin "flag" action is needed; corrections
 still go through the existing per-document checklist correction loop.
 
-- [ ] lib/checklist-store.ts: add `getAllClientIds()` (every client
+- [x] lib/checklist-store.ts: add `getAllClientIds()` (every client
       ever seeded) — the only current way to enumerate "all clients"
-- [ ] lib/client-directory.ts: `getAllClientSummaries()` — per client:
+- [x] lib/client-directory.ts: `getAllClientSummaries()` — per client:
       visa type, questionnaire progress, checklist status counts,
       derived application stage. Pure aggregation over existing
       checklist/questionnaire/application-stage modules, no new data
-- [ ] Shared client-list UI, rendered at both /admin and /rcic index
+- [x] Shared client-list UI, rendered at both /admin and /rcic index
       pages — replaces today's flat cross-client item list with a real
       "All Clients" view (per docs/OUR_USER_FLOW.md's screen list)
-- [ ] /admin/[clientId]: per-client detail — read-only questionnaire
+- [x] /admin/[clientId]: per-client detail — read-only questionnaire
       section-status summary (closes the Phase 2 visibility gap) +
       existing checklist items and forward-to-RCIC action, now scoped
       to one client instead of a flat cross-client list
-- [ ] /rcic/[clientId]: same read-only questionnaire summary +
+- [x] /rcic/[clientId]: same read-only questionnaire summary +
       existing checklist items and approve/request-changes actions,
       scoped to one client
-- [ ] Questionnaire CIF summary/print view: a clean, print-styled page
+- [x] Questionnaire CIF summary/print view: a clean, print-styled page
       showing the client's completed CIF, with a "Download PDF" button
       using the browser's native print-to-PDF (no new PDF-generation
       dependency). Reused by the client's own /questionnaire (download
       their own CIF) and by Admin/RCIC's per-client page (read-only
       review of the same content)
-- [ ] Phase 5 (Application Preparation): lib/application-submission-
+- [x] Phase 5 (Application Preparation): lib/application-submission-
       store.ts — per-client state `ready -> packaged ->
       submitted_to_ircc`. "ready" once every checklist item is
       approved (derived, not stored). Admin gets a "Mark package ready
       for RCIC" action; RCIC gets "Send to IRCC" (the flow's FINISH)
-- [ ] Client dashboard's application-stage card reflects "packaged" /
+- [x] Client dashboard's application-stage card reflects "packaged" /
       "submitted to IRCC" states too, so the client sees Phase 5
       progress, matching docs/OUR_USER_FLOW.md Phase 5's client row
 
