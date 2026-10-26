@@ -322,6 +322,45 @@ still go through the existing per-document checklist correction loop.
       "submitted to IRCC" states too, so the client sees Phase 5
       progress, matching docs/OUR_USER_FLOW.md Phase 5's client row
 
+## Phase 5 — Admin/RCIC workspace overview, invite-gated signup — Must-ship (for full-flow demo)
+
+Per a provided wireframe (3 screens: workspace overview, all-clients
+list, invitation setup), restructures Phase 4's flat /admin and /rcic
+pages into Overview + All Clients, and resolves the open Phase 1
+question (how a self-signed-up account connects to a visa type) via
+real invite-gated signup. Scope deliberately narrower than the
+wireframe in places — see docs/DECISIONS.md for what was cut and why.
+
+- [ ] lib/invite-store.ts: in-memory invite store (token, email,
+      createdAt, usedAt?) + `isInviteValid()`, same Map-per-token
+      pattern as the other stores. Token via `node:crypto`'s
+      `randomUUID()` — no new dependency
+- [ ] app/admin/invitations/page.tsx + actions.ts: Admin enters a
+      client email, gets a shareable `/invite/[token]` link back.
+      Simplified from the wireframe: no RCIC-roster/admin-assignment/
+      retainer-checkbox fields (no data model for any of those exists)
+- [ ] app/invite/[token]/page.tsx: public route, validates the token,
+      shows a signup form pre-filled with the invited email on
+      success, or an error if invalid/already used
+- [ ] app/signup/page.tsx: remove the open self-serve form — signup
+      now only happens through a valid invite link
+- [ ] lib/client-directory.ts: add `getAdminOverviewStats()`,
+      `getRcicOverviewStats()`, and `getNeedsAttentionRows()` — pure
+      aggregation over existing checklist data, same pattern as
+      getAllClientSummaries()
+- [ ] app/admin/page.tsx: new Overview (stat cards, needs-attention
+      table, handoff callout, action buttons linking to
+      /admin/clients and /admin/invitations)
+- [ ] app/admin/clients/page.tsx: existing client list moved here,
+      upgraded with search + status filter (per the wireframe).
+      Skips the "Application type" filter (single visa type) and
+      "Assigned to me" toggle (no per-admin assignment model)
+- [ ] app/rcic/page.tsx: equivalent Overview for RCIC (own stats:
+      active clients, awaiting RCIC review, changes requested, ready
+      to submit; handoff callout per docs/CURRENT_USER_FLOW_V2.md's
+      RCIC role)
+- [ ] app/rcic/clients/page.tsx: same client-list pattern as Admin's
+
 ## Stretch goals (beyond Phase 2)
 
 - Fine-grained role-based permissions (beyond the basic separate
@@ -338,3 +377,17 @@ still go through the existing per-document checklist correction loop.
 - Support for additional visa types beyond the single MVP one
 - Zoho CRM/Drive integration, if/when the standalone decision is
   revisited
+- Per-client checklist requirement add/remove/edit ("Customize
+  selected requirement" in the Phase 5 wireframe) — matches the
+  existing "Add/Remove/Customize requirements" RCIC item above
+- Real file download/ZIP export — needs real file storage first (see
+  the still-undecided Firebase Storage vs. AWS S3 sandbox experiment)
+- A standalone "internal review flag + notify RCIC" mechanism,
+  separate from the existing forward-to-RCIC note — not built since
+  it looked redundant with what Phase 4 already does; revisit if the
+  two are meant to be genuinely distinct
+- Multi-RCIC roster / per-admin client assignment ("Assigned to me",
+  a "Consultant/RCIC" picker on the invite form) — no data model for
+  this exists; needs its own design pass
+- A distinct "Review queue" page — currently just the All Clients
+  list filtered to items needing attention, not a separate page

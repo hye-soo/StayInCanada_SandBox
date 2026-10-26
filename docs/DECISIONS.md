@@ -261,3 +261,35 @@ rejected as unnecessary complexity when the browser's own print-to-PDF
 already satisfies "download as PDF" for this use case; section-level
 questionnaire flagging for Admin — rejected per the user's own
 reasoning that the client-facing progress indicator already covers it.
+
+## 2026-10-26 — Invite-gated client signup; Admin/RCIC workspace overview scoped down from its wireframe
+**Context:** A detailed 3-screen wireframe (workspace overview,
+all-clients list, invitation setup) was provided for the Admin/RCIC
+side. It matches docs/OUR_USER_FLOW.md Phase 1 closely (RCIC confirms
+the client after consultation, Admin assigns the application type and
+sends an invite link) and would resolve the open Phase 1 question
+about how a self-signed-up account connects to its visa type. But
+several of its fields assume data models that don't exist in this MVP:
+a multi-RCIC roster, per-admin client assignment, and retainer/payment
+tracking (gating checklist visibility on retainer-paid status is
+itself still an open, unbuilt item).
+**Decision:** Build a real invite system — Admin creates an invite
+with just an email, gets back a shareable `/invite/[token]` link;
+`/signup`'s open self-serve form is removed, replaced by invite-only
+signup. The invitation-setup screen is simplified to email-only,
+dropping the RCIC-picker, admin-assignment, and retainer-confirmation
+fields. `/admin` and `/rcic` are restructured into a workspace
+Overview (stat cards, cross-client needs-attention table, a
+role-specific handoff callout) plus `/admin/clients` and
+`/rcic/clients` for the existing per-client list, matching the
+wireframe's Overview/All-Clients split. The wireframe's richer
+per-client requirement editor ("Customize selected requirement",
+"Download files as ZIP") and its separate "internal review flag +
+notify RCIC" button are deferred — the latter looked redundant with
+the forward-to-RCIC note already built in Phase 4.
+**Alternatives considered:** Building the full invitation form
+(RCIC/admin pickers, retainer checkboxes) with those fields backed by
+fake/static data — rejected as decorative complexity that misrepresents
+what the product can actually do; keeping `/signup` open alongside the
+new invite flow — rejected since that would leave the Phase 1 question
+unresolved in practice (two coexisting signup paths, only one real).
