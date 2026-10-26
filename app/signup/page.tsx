@@ -25,7 +25,7 @@ export default function SignupPage() {
       // Matches firestore.rules: create-only, role must be "client".
       await setDoc(doc(db, "users", credential.user.uid), { role: "client" });
       await createSession(await credential.user.getIdToken());
-      router.push("/checklist");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign up failed.");
     } finally {

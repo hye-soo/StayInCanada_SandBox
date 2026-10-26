@@ -8,13 +8,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/client.ts";
 import { createSession } from "@/lib/firebase/session-actions.ts";
 import { Button } from "@/components/ui/button";
+import { ROLE_LANDING } from "@/lib/role-landing.ts";
 import type { UserRole } from "@/lib/types.ts";
-
-const ROLE_LANDING: Record<UserRole, string> = {
-  client: "/checklist",
-  admin: "/admin",
-  rcic: "/rcic",
-};
 
 export default function LoginPage() {
   const router = useRouter();

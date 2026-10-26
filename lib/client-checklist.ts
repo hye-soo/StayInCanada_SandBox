@@ -5,6 +5,10 @@ import type { ChecklistItem, VisaType } from "./types.ts";
 // 2026-09-29) — not stored per-client, since there's only ever one.
 const MVP_VISA_TYPE: VisaType = "student";
 
+export const VISA_TYPE_LABEL: Record<VisaType, string> = {
+  student: "Study permit extension",
+};
+
 export function getClientChecklist(clientId: string): {
   visaType: VisaType;
   items: ChecklistItem[];
