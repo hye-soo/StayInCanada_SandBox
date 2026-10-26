@@ -135,3 +135,29 @@ custom) remains a separate, still-open sandbox experiment.
 **Alternatives considered:** Merging Admin and Staff into one login
 for the MVP to save time — superseded by the team's own MVP.md, which
 treats the 3-way split as foundational rather than optional.
+
+## 2026-10-26 — Sandbox v2: one branch + feature folders, real Firebase Auth reused, quick-switch demo accounts
+**Context:** Prior sandboxing split each feature across its own git
+branch (hye-sandbox-v1 → hye-checklist-flow, then
+hye-dashboard-question-flow), which made the overall user flow from
+docs/OUR_USER_FLOW.md hard to see as one working product. A rebuild
+was requested: one branch, one folder per feature, walking the full
+flow end to end.
+**Decision:** New branch hye-sandbox-v2 (off main) with feature
+folders under app/sandbox/ (onboarding, intake, checklist, review,
+preparation, dashboard), one per docs/OUR_USER_FLOW.md phase. Reuses
+real Firebase Auth + session verification as-is (already built and
+tested, docs/FIREBASE_AUTH_SANDBOX.md) rather than mocking auth —
+a separate mock-session layer was considered and rejected since real
+auth already exists at zero extra cost. For faster demoing without
+retyping credentials, 3 seeded demo accounts (Client/Admin/RCIC) are
+added with a quick-switch panel that calls the existing real sign-in +
+session flow — not a new auth mechanism, just a UI shortcut onto it.
+Checklist/questionnaire content stays mock/in-memory, unchanged from
+the current app.
+**Alternatives considered:** A separate mock-session layer avoiding
+Firebase entirely — rejected as wasted effort since real auth is
+already built and working; reorganizing the real app's existing
+folders (app/(client), app/admin, app/rcic) instead of a separate
+sandbox — rejected per the user's explicit choice to keep this
+separate from the real app.

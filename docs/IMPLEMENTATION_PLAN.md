@@ -39,6 +39,31 @@ feed the open questions in Phase 1/2 below.
 - [ ] "Unique relationship" check (RCIC ↔ client) — meaning unclear,
       confirm with instructor
 
+## Sandbox v2 — full user-flow demo (single branch, feature folders)
+
+Supersedes the per-feature-branch sandbox pattern (hye-sandbox-v1 →
+hye-checklist-flow, hye-dashboard-question-flow) for *this* purpose:
+previously each sandboxed feature lived on its own branch, making the
+overall user flow hard to see as one working thing. This builds every
+phase of docs/OUR_USER_FLOW.md as one clickable product, in feature
+folders under app/sandbox/, on a single branch (hye-sandbox-v2, off
+main). See docs/DECISIONS.md 2026-10-26.
+
+- [ ] Branch hye-sandbox-v2 created off main
+- [ ] app/sandbox/page.tsx — flow map home page linking all 5 phases,
+      plus a quick-switch panel (Client/Admin/RCIC demo accounts)
+- [ ] lib/sandbox/demo-accounts.ts — reads 3 demo account credentials
+      from env, reuses the existing real sign-in + createSession flow
+      (no new auth mechanism)
+- [ ] 3 demo accounts seeded (one per role), credentials added to
+      .env.local (never committed)
+- [ ] app/sandbox/onboarding/ — Phase 1 (signup/login, real Firebase Auth)
+- [ ] app/sandbox/intake/ — Phase 2 (questionnaire sections)
+- [ ] app/sandbox/checklist/ — Phase 3 (+ [itemId])
+- [ ] app/sandbox/review/ — Phase 4 (Admin/RCIC review & validation)
+- [ ] app/sandbox/preparation/ — Phase 5 (application prep / IRCC submission, mock)
+- [ ] app/sandbox/dashboard/ — client landing page, entry point into the flow
+
 ## Phase 1 — Client accounts, visa-type checklist & intake questionnaire (data layer) — Must-ship
 
 - [ ] Define data model for clients, visa types, and required-document
