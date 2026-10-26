@@ -40,14 +40,24 @@ test("an empty checklist defaults to gathering information", () => {
   assert.equal(getApplicationStage([]).stage, "gathering_information");
 });
 
-test("getDashboardStage falls back to the checklist-derived stage when submission is still 'ready'", () => {
+test("getDashboardStage falls back to the checklist-derived stage while awaiting validation", () => {
   const items = [item("approved"), item("required")];
-  assert.equal(getDashboardStage(items, "ready").stage, "gathering_information");
+  assert.equal(getDashboardStage(items, "awaiting_validation").stage, "gathering_information");
 });
 
-test("getDashboardStage overrides the label once Admin has packaged the file", () => {
-  const info = getDashboardStage([item("approved")], "packaged");
-  assert.match(info.label, /packaged/i);
+test("getDashboardStage overrides the label once RCIC has validated requirements", () => {
+  const info = getDashboardStage([item("approved")], "validated");
+  assert.match(info.label, /validated|review/i);
+});
+
+test("getDashboardStage overrides the label once Admin has prepared the package", () => {
+  const info = getDashboardStage([item("approved")], "package_prepared");
+  assert.match(info.label, /package/i);
+});
+
+test("getDashboardStage overrides the label once RCIC has approved the package", () => {
+  const info = getDashboardStage([item("approved")], "approved_for_submission");
+  assert.match(info.label, /approved/i);
 });
 
 test("getDashboardStage overrides the label once RCIC has submitted to IRCC", () => {

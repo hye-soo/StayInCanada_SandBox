@@ -57,17 +57,15 @@ export default async function RcicOverviewPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{stats.readyToSubmit}</p>
-            <p className="text-xs text-muted-foreground">Packaged by Admin</p>
+            <p className="text-xs text-muted-foreground">Package approved, awaiting submission</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Button render={<Link href="/rcic/clients">View all clients</Link>} />
-        <Button
-          variant="outline"
-          render={<Link href="/rcic/clients?status=needs_attention">Review queue</Link>}
-        />
+        <Button variant="outline" render={<Link href="/rcic/final-reviews">Final reviews</Link>} />
+        <Button variant="outline" render={<Link href="/rcic/applications">Applications</Link>} />
       </div>
 
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border">

@@ -49,8 +49,8 @@ export default async function DashboardPage() {
   ).length;
   const approved = items.filter((item) => item.status === "approved").length;
 
-  const submissionState = getApplicationSubmissionStore().getState(uid);
-  const stage = getDashboardStage(items, submissionState);
+  const submission = getApplicationSubmissionStore().get(uid);
+  const stage = getDashboardStage(items, submission.state);
   const latestFeedbackItem = items.find((item) => item.rcicComment);
 
   return (

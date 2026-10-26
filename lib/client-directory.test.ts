@@ -6,6 +6,9 @@ import {
   getAdminOverviewStats,
   getRcicOverviewStats,
   getNeedsAttentionRows,
+  needsRcicValidation,
+  needsPackageApproval,
+  needsSubmissionRecording,
 } from "./client-directory.ts";
 import { getChecklistStore } from "./checklist-store.ts";
 import { updateClientQuestionnaireSection } from "./client-questionnaire.ts";
@@ -21,7 +24,7 @@ test("a fresh client summary: all checklist items required, no questionnaire sec
   assert.equal(summary.questionnaireComplete, 0);
   assert.ok(summary.questionnaireTotal > 0);
   assert.equal(summary.stage.stage, "gathering_information");
-  assert.equal(summary.submissionState, "ready");
+  assert.equal(summary.submission.state, "awaiting_validation");
 });
 
 test("checklistCounts reflects updated item statuses", () => {
@@ -72,7 +75,7 @@ test("getAdminOverviewStats counts submitted/under_review/needs-client-action it
   assert.equal(after.clientFollowUps, before.clientFollowUps + 3);
 });
 
-test("getRcicOverviewStats counts under_review/changes_required items and packaged clients", () => {
+test("getRcicOverviewStats counts under_review/changes_required items and approved-for-submission clients", () => {
   const before = getRcicOverviewStats();
 
   const clientId = "uid-stats-rcic-1";
@@ -80,11 +83,34 @@ test("getRcicOverviewStats counts under_review/changes_required items and packag
   for (const item of store.getChecklist(clientId)) {
     store.updateItem(clientId, { ...item, status: "approved" });
   }
-  applySubmissionAction(clientId, { type: "mark_packaged" });
+  applySubmissionAction(clientId, { type: "validate" }, "Jean Martin");
+  applySubmissionAction(clientId, { type: "prepare_package", preparedBy: "Alex Morgan" }, "Alex Morgan");
+  applySubmissionAction(clientId, { type: "approve_package" }, "Jean Martin");
 
   const after = getRcicOverviewStats();
   assert.equal(after.activeClients, before.activeClients + 1);
   assert.equal(after.readyToSubmit, before.readyToSubmit + 1);
+});
+
+test("needsRcicValidation / needsPackageApproval / needsSubmissionRecording reflect each stage", () => {
+  const clientId = "uid-stats-rcic-2";
+  const store = getChecklistStore();
+  for (const item of store.getChecklist(clientId)) {
+    store.updateItem(clientId, { ...item, status: "approved" });
+  }
+
+  assert.equal(needsRcicValidation(getClientSummary(clientId)), true);
+  assert.equal(needsPackageApproval(getClientSummary(clientId)), false);
+
+  applySubmissionAction(clientId, { type: "validate" }, "Jean Martin");
+  assert.equal(needsRcicValidation(getClientSummary(clientId)), false);
+
+  applySubmissionAction(clientId, { type: "prepare_package", preparedBy: "Alex Morgan" }, "Alex Morgan");
+  assert.equal(needsPackageApproval(getClientSummary(clientId)), true);
+
+  applySubmissionAction(clientId, { type: "approve_package" }, "Jean Martin");
+  assert.equal(needsPackageApproval(getClientSummary(clientId)), false);
+  assert.equal(needsSubmissionRecording(getClientSummary(clientId)), true);
 });
 
 test("getNeedsAttentionRows includes a new client's non-approved items with the right owner", () => {

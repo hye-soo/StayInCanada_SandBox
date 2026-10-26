@@ -45,28 +45,41 @@ export function getApplicationStage(items: ChecklistItem[]): ApplicationStageInf
   return { stage, ...STAGE_INFO[stage] };
 }
 
-// Phase 5 (docs/OUR_USER_FLOW.md): once Admin/RCIC act on the
-// submission state, that overrides the plain checklist-derived stage
-// for the client's own display — "ready for submission" becomes
-// "packaged" / "submitted to IRCC" instead.
+const SUBMISSION_DISPLAY: Partial<
+  Record<SubmissionState, Omit<ApplicationStageInfo, "stage">>
+> = {
+  validated: {
+    label: "Validated — preparing your file",
+    description:
+      "Your RCIC has validated your intake and documents. Your team is now preparing your file for submission.",
+  },
+  package_prepared: {
+    label: "Package under final review",
+    description:
+      "Your file has been prepared and is undergoing a final review by your RCIC before submission.",
+  },
+  approved_for_submission: {
+    label: "Approved for submission",
+    description: "Your file has been approved. Your team is finalizing submission to IRCC.",
+  },
+  submitted_to_ircc: {
+    label: "Submitted to IRCC",
+    description: "Your application has been submitted to IRCC. We'll update you here once there's news.",
+  },
+};
+
+// Phase 4b/5 (docs/DECISIONS.md 2026-10-26): once RCIC/Admin move past
+// plain checklist approval (validate -> package -> approve -> submit),
+// that overrides the checklist-derived stage for the client's own
+// display. "awaiting_validation" still falls back to the plain
+// checklist-derived stage below.
 export function getDashboardStage(
   items: ChecklistItem[],
   submissionState: SubmissionState
 ): ApplicationStageInfo {
-  if (submissionState === "packaged") {
-    return {
-      stage: "ready_for_submission",
-      label: "Packaged for RCIC",
-      description:
-        "Your file has been packaged and is with your RCIC for a final review before submission to IRCC.",
-    };
-  }
-  if (submissionState === "submitted_to_ircc") {
-    return {
-      stage: "ready_for_submission",
-      label: "Submitted to IRCC",
-      description: "Your application has been submitted to IRCC. We'll update you here once there's news.",
-    };
+  const override = SUBMISSION_DISPLAY[submissionState];
+  if (override) {
+    return { stage: "ready_for_submission", ...override };
   }
   return getApplicationStage(items);
 }

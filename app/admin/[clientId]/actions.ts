@@ -25,11 +25,13 @@ export async function forwardToRcic(clientId: string, itemId: string, formData: 
   redirect(`/admin/${clientId}`);
 }
 
-// Phase 5 (docs/OUR_USER_FLOW.md): once every checklist item is
-// approved, Admin packages the file for RCIC's final review.
-export async function markPackageReady(clientId: string) {
-  await requireRole(["admin"]);
-  const result = applySubmissionAction(clientId, { type: "mark_packaged" });
+// Phase 4b (docs/DECISIONS.md 2026-10-26): once RCIC has validated the
+// client's requirements, Admin prepares the package for RCIC's final
+// package-level review.
+export async function preparePackage(clientId: string) {
+  const session = await requireRole(["admin"]);
+  const actorName = session.displayName || session.email || "Admin";
+  const result = applySubmissionAction(clientId, { type: "prepare_package", preparedBy: actorName }, actorName);
 
   if (result.error) {
     redirect(`/admin/${clientId}?error=${encodeURIComponent(result.error)}`);

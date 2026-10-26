@@ -5,7 +5,7 @@ import { getSectionStatus } from "./questionnaire-progress.ts";
 import { SECTION_LABELS } from "./questionnaire-fields.ts";
 import { getApplicationStage, type ApplicationStageInfo } from "./application-stage.ts";
 import { getApplicationSubmissionStore } from "./application-submission-store.ts";
-import type { SubmissionState } from "./application-submission-transitions.ts";
+import type { ApplicationSubmission } from "./application-submission-transitions.ts";
 import { STATUS_LABEL } from "./status-display.ts";
 import type { ChecklistItemStatus, QuestionnaireSectionId, VisaType } from "./types.ts";
 
@@ -17,7 +17,7 @@ export interface ClientSummary {
   questionnaireTotal: number;
   checklistCounts: Record<ChecklistItemStatus, number>;
   stage: ApplicationStageInfo;
-  submissionState: SubmissionState;
+  submission: ApplicationSubmission;
 }
 
 const SECTION_IDS = Object.keys(SECTION_LABELS) as QuestionnaireSectionId[];
@@ -50,7 +50,7 @@ export function getClientSummary(clientId: string): ClientSummary {
     questionnaireTotal: SECTION_IDS.length,
     checklistCounts,
     stage: getApplicationStage(items),
-    submissionState: getApplicationSubmissionStore().getState(clientId),
+    submission: getApplicationSubmissionStore().get(clientId),
   };
 }
 
@@ -99,9 +99,23 @@ export function getRcicOverviewStats(): RcicOverviewStats {
   for (const summary of summaries) {
     awaitingReview += summary.checklistCounts.under_review;
     changesRequested += summary.checklistCounts.changes_required;
-    if (summary.submissionState === "packaged") readyToSubmit++;
+    if (summary.submission.state === "approved_for_submission") readyToSubmit++;
   }
   return { activeClients: summaries.length, awaitingReview, changesRequested, readyToSubmit };
+}
+
+// RCIC's "Final reviews" vs "Applications" lists (per the RCIC
+// workspace wireframe, docs/DECISIONS.md 2026-10-26).
+export function needsRcicValidation(summary: ClientSummary): boolean {
+  return summary.submission.state === "awaiting_validation" && summary.stage.stage === "ready_for_submission";
+}
+
+export function needsPackageApproval(summary: ClientSummary): boolean {
+  return summary.submission.state === "package_prepared";
+}
+
+export function needsSubmissionRecording(summary: ClientSummary): boolean {
+  return summary.submission.state === "approved_for_submission";
 }
 
 export type ItemOwner = "Client" | "Admin" | "RCIC";

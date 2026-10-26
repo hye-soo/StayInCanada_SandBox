@@ -13,7 +13,8 @@ const NAV_LINKS: Record<StaffRole, { href: string; label: string }[]> = {
   rcic: [
     { href: "/rcic", label: "Overview" },
     { href: "/rcic/clients", label: "All clients" },
-    { href: "/rcic/clients?status=needs_attention", label: "Review queue" },
+    { href: "/rcic/final-reviews", label: "Final reviews" },
+    { href: "/rcic/applications", label: "Applications" },
   ],
 };
 

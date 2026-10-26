@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { forwardToRcic, markPackageReady } from "./actions.ts";
+import { forwardToRcic, preparePackage } from "./actions.ts";
 import type { QuestionnaireSectionId } from "@/lib/types.ts";
 
 export default async function AdminClientPage({
@@ -125,19 +125,21 @@ export default async function AdminClientPage({
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Application preparation</h2>
-        {summary.submissionState === "ready" ? (
-          summary.stage.stage === "ready_for_submission" ? (
-            <form action={markPackageReady.bind(null, clientId)}>
-              <Button type="submit">Mark package ready for RCIC</Button>
-            </form>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Not yet ready — every checklist item must be approved first.
-            </p>
-          )
-        ) : summary.submissionState === "packaged" ? (
+        {summary.submission.state === "validated" ? (
+          <form action={preparePackage.bind(null, clientId)}>
+            <Button type="submit">Prepare package</Button>
+          </form>
+        ) : summary.submission.state === "awaiting_validation" ? (
           <p className="text-sm text-muted-foreground">
-            Package sent to RCIC for final review.
+            Waiting on RCIC to validate requirements before a package can be prepared.
+          </p>
+        ) : summary.submission.state === "package_prepared" ? (
+          <p className="text-sm text-muted-foreground">
+            Package v{summary.submission.package?.version} is with RCIC for final review.
+          </p>
+        ) : summary.submission.state === "approved_for_submission" ? (
+          <p className="text-sm text-muted-foreground">
+            Package approved — waiting on RCIC to record submission to IRCC.
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">Submitted to IRCC.</p>

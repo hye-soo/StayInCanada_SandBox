@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/firebase/session.ts";
 import { getClientChecklist } from "@/lib/client-checklist.ts";
 import { getClientQuestionnaire } from "@/lib/client-questionnaire.ts";
-import { getClientSummary } from "@/lib/client-directory.ts";
+import { getClientSummary, needsRcicValidation } from "@/lib/client-directory.ts";
 import { getSectionStatus } from "@/lib/questionnaire-progress.ts";
 import {
   SECTION_LABELS,
@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { approveItem, requestChanges, sendToIrcc } from "./actions.ts";
+import { approveItem, requestChanges } from "./actions.ts";
 import type { QuestionnaireSectionId } from "@/lib/types.ts";
 
 export default async function RcicClientPage({
@@ -137,17 +137,18 @@ export default async function RcicClientPage({
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Application preparation</h2>
-        {summary.submissionState === "packaged" ? (
-          <form action={sendToIrcc.bind(null, clientId)}>
-            <Button type="submit">Send to IRCC</Button>
-          </form>
-        ) : summary.submissionState === "submitted_to_ircc" ? (
-          <p className="text-sm text-muted-foreground">Submitted to IRCC. Application complete.</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Waiting on Admin to package the file.
-          </p>
-        )}
+        <p className="text-sm text-muted-foreground">
+          Current stage: {summary.stage.label}
+          {needsRcicValidation(summary) || summary.submission.state !== "awaiting_validation" ? (
+            <>
+              {" "}
+              ·{" "}
+              <Link href={`/rcic/${clientId}/validation`} className="underline">
+                Go to final review
+              </Link>
+            </>
+          ) : null}
+        </p>
       </section>
     </main>
   );
