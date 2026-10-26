@@ -48,6 +48,31 @@ feed the open questions in Phase 1/2 below.
 - [ ] "Unique relationship" check (RCIC ↔ client) — meaning unclear,
       confirm with instructor
 
+## Sandbox v2 — full user-flow demo (single branch, feature folders)
+
+Supersedes the per-feature-branch sandbox pattern (hye-sandbox-v1 →
+hye-checklist-flow, hye-dashboard-question-flow) for *this* purpose:
+previously each sandboxed feature lived on its own branch, making the
+overall user flow hard to see as one working thing. This builds every
+phase of docs/OUR_USER_FLOW.md as one clickable product, in feature
+folders under app/sandbox/, on a single branch (hye-sandbox-v2, off
+main). See docs/DECISIONS.md 2026-10-26.
+
+- [ ] Branch hye-sandbox-v2 created off main
+- [ ] app/sandbox/page.tsx — flow map home page linking all 5 phases,
+      plus a quick-switch panel (Client/Admin/RCIC demo accounts)
+- [ ] lib/sandbox/demo-accounts.ts — reads 3 demo account credentials
+      from env, reuses the existing real sign-in + createSession flow
+      (no new auth mechanism)
+- [ ] 3 demo accounts seeded (one per role), credentials added to
+      .env.local (never committed)
+- [ ] app/sandbox/onboarding/ — Phase 1 (signup/login, real Firebase Auth)
+- [ ] app/sandbox/intake/ — Phase 2 (questionnaire sections)
+- [ ] app/sandbox/checklist/ — Phase 3 (+ [itemId])
+- [ ] app/sandbox/review/ — Phase 4 (Admin/RCIC review & validation)
+- [ ] app/sandbox/preparation/ — Phase 5 (application prep / IRCC submission, mock)
+- [ ] app/sandbox/dashboard/ — client landing page, entry point into the flow
+
 ## Phase 1 — Client accounts, visa-type checklist & intake questionnaire (data layer) — Must-ship
 
 - [x] Define data model for clients, visa types, and required-document
@@ -99,11 +124,15 @@ feed the open questions in Phase 1/2 below.
       cross-check in Phase 2. Supports incremental/draft saves so
       client progress auto-saves and resumes exactly where they left
       off (core to the questionnaire, not deferred); sectioned into
-      smaller parts with a progress indicator (per docs/MVP.md)
+      smaller parts with a progress indicator (per docs/MVP.md). Exact
+      sections/fields now live in docs/CIF.md (filled in 2026-10-09) —
+      see Phase 3 below for the concrete build steps
 - [ ] Open question (per docs/MVP.md, marked "undecided" by the team):
       conditional questions — should the questionnaire change or skip
-      questions based on earlier answers and visa type? Not yet
-      decided; plain linear questionnaire is the fallback if unresolved
+      questions based on earlier answers and visa type? Resolved for
+      now: plain linear form first (per docs/CIF.md); branching can be
+      layered on later per-field via docs/CIF.md's "Conditional on"
+      column once there's real content to branch on
 - [x] API/route to fetch a logged-in client's checklist with each
       item's status (required / submitted / under review / changes
       required / approved — per docs/MVP.md). All 5 states and their
@@ -206,15 +235,62 @@ below.
       - Upload receipt confirmation: instant email listing files
         received, noting an RCIC will review them
 
+## Phase 3 — Client dashboard & smart intake questionnaire — Must-ship
+
+Client dashboard first, before any Admin/RCIC dashboard (see
+docs/DECISIONS.md). Ordered build steps:
+
+- [x] Fill in docs/CIF.md with the real CIF sections/fields — the real
+      form is bigger than a flat field list: Sections A-D and the
+      Declaration are fixed fields/yes-no questions, but Employment
+      (E), Education (F), Addresses (G), Children (I), Siblings (J),
+      and Travel History (K) are repeatable groups/tables (variable
+      count, not fixed slots). The Photograph Specifications at the
+      end are instructional content, not a data-collection section —
+      they belong as guidance on a document-checklist item, not in
+      the questionnaire itself — confirmed: add a new "Photo" item to
+      the Student visa checklist (lib/checklist-store.ts doesn't have
+      one yet), using the Photograph Specifications text from
+      docs/CIF.md as its "why this is needed" guidance content
+- [ ] Questionnaire data model (lib/types.ts): per-client response
+      record matching docs/CIF.md's actual structure — fixed fields
+      for sections A-D, an array of answers for each repeatable group
+      (employers, institutions, addresses, children, siblings, travel
+      history entries), and a fixed yes/no map for the Declaration.
+      Status per section (not started / in progress / complete) for
+      the progress indicator
+- [ ] Questionnaire store: same pattern as lib/checklist-store.ts —
+      lazily seed an empty draft per client uid, auto-save on each
+      field change, behind a swappable interface
+- [ ] Questionnaire UI (new route, e.g. /questionnaire): sectioned
+      form matching docs/CIF.md, save-and-continue, per-section
+      progress indicator — plain linear for now (see Phase 1 above)
+- [ ] Client dashboard page (new route, e.g. /dashboard): combines
+      three existing/new data sources into one landing page —
+      questionnaire progress summary + link to continue, document
+      checklist summary (reuse lib/client-checklist.ts), and
+      application progress summary (reuse lib/status-display.ts's
+      STATUS_NEXT_STEP, aggregated across items)
+- [ ] Make /dashboard the client role's post-login landing page
+      (update ROLE_LANDING in app/login/page.tsx); /checklist and the
+      new /questionnaire stay reachable from it, not replaced by it
+- [ ] Admin dashboard and RCIC dashboard — deferred, see Stretch goals
+      below; not started this phase
+- [ ] Add the "Photo" item to the Student visa checklist seed
+      (lib/checklist-store.ts), using the Photograph Specifications
+      text from docs/CIF.md as its guidance content — deprioritized to
+      last; the questionnaire matters more right now
+
 ## Stretch goals (beyond Phase 2)
 
 - Fine-grained role-based permissions (beyond the basic separate
   Client/Admin/RCIC logins already in Phase 1 must-ship — per
   docs/MVP.md)
-- Admin/RCIC dashboard (per docs/MVP.md's "Staff dashboard")
+- Admin dashboard and RCIC dashboard (per docs/MVP.md's "Staff
+  dashboard") — planned after the client dashboard (Phase 3 above)
 - Search and filtering (per docs/MVP.md)
-- Richer client progress dashboard (beyond the simple status view
-  promoted into Phase 2 must-ship above)
+- Richer client dashboard polish (beyond Phase 3's basic version —
+  e.g. richer visualizations, not just a progress summary)
 - General two-way in-portal communication channel (beyond the
   per-item RCIC feedback already in Phase 2 must-ship)
 - Support for additional visa types beyond the single MVP one

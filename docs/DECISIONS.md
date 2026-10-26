@@ -177,3 +177,53 @@ is now built."
 **Alternatives considered:** Treating the mock preview as validating
 the auto-fill feature — rejected; it is static hardcoded text with no
 real document parsing or form-field logic behind it.
+
+## 2026-10-09 — Client dashboard before Admin/RCIC dashboards; CIF content moved to its own file
+**Context:** Building a dashboard was requested, but MVP.md only names
+a "Staff Dashboard" under Later/stretch, with no client-facing
+dashboard named anywhere. CURRENT_USER_FLOW_V2.md separately describes
+a client-facing "Portal Dashboard" (visa pathway, checklist, intake
+progress). The intake questionnaire's content (CIF sections/fields)
+also has never been written down anywhere in the docs — every mention
+so far has been structural (section names, auto-save, progress), never
+the actual fields to ask.
+**Decision:** Scope Phase 3 to the client-facing dashboard only
+(combining questionnaire progress, document checklist, and application
+progress into one landing page); Admin and RCIC dashboards stay
+deferred to Stretch. Moved the actual CIF content out of
+IMPLEMENTATION_PLAN.md and into a new docs/CIF.md for the client to
+fill in directly, rather than guessing field names/sections. The
+previously-open "conditional questions" question is resolved as: plain
+linear form first, branching layered on later per-field via CIF.md
+once there's real content to branch on.
+**Alternatives considered:** Building all three dashboards (client,
+admin, RCIC) together — rejected to avoid scope creep beyond what was
+asked for this round; guessing at CIF field content ourselves —
+rejected since this is real client-specific legal/application data
+that shouldn't be invented.
+
+## 2026-10-26 — Sandbox v2: one branch + feature folders, real Firebase Auth reused, quick-switch demo accounts
+**Context:** Prior sandboxing split each feature across its own git
+branch (hye-sandbox-v1 → hye-checklist-flow, then
+hye-dashboard-question-flow), which made the overall user flow from
+docs/OUR_USER_FLOW.md hard to see as one working product. A rebuild
+was requested: one branch, one folder per feature, walking the full
+flow end to end.
+**Decision:** New branch hye-sandbox-v2 (off main) with feature
+folders under app/sandbox/ (onboarding, intake, checklist, review,
+preparation, dashboard), one per docs/OUR_USER_FLOW.md phase. Reuses
+real Firebase Auth + session verification as-is (already built and
+tested, docs/FIREBASE_AUTH_SANDBOX.md) rather than mocking auth —
+a separate mock-session layer was considered and rejected since real
+auth already exists at zero extra cost. For faster demoing without
+retyping credentials, 3 seeded demo accounts (Client/Admin/RCIC) are
+added with a quick-switch panel that calls the existing real sign-in +
+session flow — not a new auth mechanism, just a UI shortcut onto it.
+Checklist/questionnaire content stays mock/in-memory, unchanged from
+the current app.
+**Alternatives considered:** A separate mock-session layer avoiding
+Firebase entirely — rejected as wasted effort since real auth is
+already built and working; reorganizing the real app's existing
+folders (app/(client), app/admin, app/rcic) instead of a separate
+sandbox — rejected per the user's explicit choice to keep this
+separate from the real app.
