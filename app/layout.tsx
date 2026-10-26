@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import { AuthProvider } from "@/lib/firebase/auth-context.tsx";
-import { AuthStatus } from "@/components/auth-status.tsx";
+import { AppHeader } from "@/components/app-header.tsx";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,12 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3 print:hidden">
-            <Link href="/dashboard" className="text-sm font-medium hover:underline">
-              StayinCanada (sandbox)
-            </Link>
-            <AuthStatus />
-          </header>
+          <AppHeader />
           {children}
         </AuthProvider>
       </body>
