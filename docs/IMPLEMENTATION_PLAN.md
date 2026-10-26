@@ -252,42 +252,84 @@ docs/DECISIONS.md). Ordered build steps:
       the Student visa checklist (lib/checklist-store.ts doesn't have
       one yet), using the Photograph Specifications text from
       docs/CIF.md as its "why this is needed" guidance content
-- [ ] Questionnaire data model (lib/types.ts): per-client response
+- [x] Questionnaire data model (lib/types.ts): per-client response
       record matching docs/CIF.md's actual structure — fixed fields
       for sections A-D, an array of answers for each repeatable group
       (employers, institutions, addresses, children, siblings, travel
       history entries), and a fixed yes/no map for the Declaration.
       Status per section (not started / in progress / complete) for
       the progress indicator
-- [ ] Questionnaire store: same pattern as lib/checklist-store.ts —
+- [x] Questionnaire store: same pattern as lib/checklist-store.ts —
       lazily seed an empty draft per client uid, auto-save on each
       field change, behind a swappable interface
-- [ ] Questionnaire UI (new route, e.g. /questionnaire): sectioned
-      form matching docs/CIF.md, save-and-continue, per-section
-      progress indicator — plain linear for now (see Phase 1 above)
-- [ ] Client dashboard page (new route, e.g. /dashboard): combines
-      three existing/new data sources into one landing page —
-      questionnaire progress summary + link to continue, document
-      checklist summary (reuse lib/client-checklist.ts), and
-      application progress summary (reuse lib/status-display.ts's
-      STATUS_NEXT_STEP, aggregated across items)
-- [ ] Make /dashboard the client role's post-login landing page
-      (update ROLE_LANDING in app/login/page.tsx); /checklist and the
-      new /questionnaire stay reachable from it, not replaced by it
-- [ ] Admin dashboard and RCIC dashboard — deferred, see Stretch goals
-      below; not started this phase
+- [x] Questionnaire UI (/questionnaire): all 11 CIF sections built,
+      save-and-continue, per-section progress indicator — applicant
+      info paginated into 3 steps (per docs/MEETING.md's language-
+      barrier guidance), the rest plain linear single-page sections
+- [x] Client dashboard page (/dashboard): combines questionnaire
+      progress summary + link to continue, document checklist summary,
+      and derived application stage into one landing page, per the
+      provided wireframe
+- [x] Make /dashboard the client role's post-login landing page
+      (lib/role-landing.ts ROLE_LANDING); /checklist and /questionnaire
+      stay reachable from it, not replaced by it
+- [ ] Admin dashboard and RCIC dashboard — promoted from Stretch for
+      the full-flow demo; see the new Phase 4 section below instead of
+      Stretch goals
 - [ ] Add the "Photo" item to the Student visa checklist seed
       (lib/checklist-store.ts), using the Photograph Specifications
       text from docs/CIF.md as its guidance content — deprioritized to
       last; the questionnaire matters more right now
+
+## Phase 4 — Shared Admin/RCIC per-client dashboard, questionnaire visibility & application preparation — Must-ship (for full-flow demo)
+
+Per docs/OUR_USER_FLOW.md, promoted from Stretch (supersedes the
+2026-10-09 deferral — see docs/DECISIONS.md). One shared dashboard
+shell for Admin and RCIC (same layout, role-specific actions), not two
+separate dashboards. Questionnaire visibility is read-only for both
+roles — the client's own progress indicator already surfaces missing
+sections, so no separate admin "flag" action is needed; corrections
+still go through the existing per-document checklist correction loop.
+
+- [ ] lib/checklist-store.ts: add `getAllClientIds()` (every client
+      ever seeded) — the only current way to enumerate "all clients"
+- [ ] lib/client-directory.ts: `getAllClientSummaries()` — per client:
+      visa type, questionnaire progress, checklist status counts,
+      derived application stage. Pure aggregation over existing
+      checklist/questionnaire/application-stage modules, no new data
+- [ ] Shared client-list UI, rendered at both /admin and /rcic index
+      pages — replaces today's flat cross-client item list with a real
+      "All Clients" view (per docs/OUR_USER_FLOW.md's screen list)
+- [ ] /admin/[clientId]: per-client detail — read-only questionnaire
+      section-status summary (closes the Phase 2 visibility gap) +
+      existing checklist items and forward-to-RCIC action, now scoped
+      to one client instead of a flat cross-client list
+- [ ] /rcic/[clientId]: same read-only questionnaire summary +
+      existing checklist items and approve/request-changes actions,
+      scoped to one client
+- [ ] Questionnaire CIF summary/print view: a clean, print-styled page
+      showing the client's completed CIF, with a "Download PDF" button
+      using the browser's native print-to-PDF (no new PDF-generation
+      dependency). Reused by the client's own /questionnaire (download
+      their own CIF) and by Admin/RCIC's per-client page (read-only
+      review of the same content)
+- [ ] Phase 5 (Application Preparation): lib/application-submission-
+      store.ts — per-client state `ready -> packaged ->
+      submitted_to_ircc`. "ready" once every checklist item is
+      approved (derived, not stored). Admin gets a "Mark package ready
+      for RCIC" action; RCIC gets "Send to IRCC" (the flow's FINISH)
+- [ ] Client dashboard's application-stage card reflects "packaged" /
+      "submitted to IRCC" states too, so the client sees Phase 5
+      progress, matching docs/OUR_USER_FLOW.md Phase 5's client row
 
 ## Stretch goals (beyond Phase 2)
 
 - Fine-grained role-based permissions (beyond the basic separate
   Client/Admin/RCIC logins already in Phase 1 must-ship — per
   docs/MVP.md)
-- Admin dashboard and RCIC dashboard (per docs/MVP.md's "Staff
-  dashboard") — planned after the client dashboard (Phase 3 above)
+- Admin dashboard and RCIC dashboard — promoted to Phase 4 above for
+  the full-flow demo (see docs/DECISIONS.md); further polish beyond
+  Phase 4's version stays here (e.g. search/filtering the client list)
 - Search and filtering (per docs/MVP.md)
 - Richer client dashboard polish (beyond Phase 3's basic version —
   e.g. richer visualizations, not just a progress summary)

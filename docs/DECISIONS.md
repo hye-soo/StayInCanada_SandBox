@@ -227,3 +227,37 @@ already built and working; reorganizing the real app's existing
 folders (app/(client), app/admin, app/rcic) instead of a separate
 sandbox — rejected per the user's explicit choice to keep this
 separate from the real app.
+
+## 2026-10-26 — Shared Admin/RCIC per-client dashboard promoted from Stretch; questionnaire read-only; CIF PDF via browser print
+**Context:** Auditing the real app against docs/OUR_USER_FLOW.md
+(prompted by building app/sandbox/ as a flow map over the existing
+pages) found three gaps: Admin/RCIC have no visibility into the
+questionnaire at all; there's no per-client "All Clients Dashboard"
+(OUR_USER_FLOW.md's screen #3/#4), only a flat cross-client document
+list; and Phase 5 (Application Preparation / IRCC submission) doesn't
+exist anywhere. The 2026-10-09 decision had deferred Admin/RCIC
+dashboards to Stretch, which this revisits specifically to make the
+sandbox demo show the complete flow end to end, not isolated pieces.
+**Decision:** One shared dashboard shell/UI for Admin and RCIC (same
+per-client list and detail layout), not two separate dashboards —
+mounted at both /admin and /rcic so each route still independently
+enforces its own role (preserves the Admin-never-contacts-client /
+RCIC-is-sole-gate separation from docs/DECISIONS.md 2026-10-08).
+Questionnaire visibility for both roles is read-only: the client's own
+per-section progress indicator already surfaces missing/incomplete
+sections, so no new admin "flag a section" action is needed;
+corrections still route through the existing per-document checklist
+correction loop. Clients (and Admin/RCIC reviewing them) can download
+a completed CIF via a print-styled summary page and the browser's
+native print-to-PDF, rather than adding a server-side PDF-generation
+dependency. Phase 5 is scoped as a minimal per-client
+ready/packaged/submitted_to_ircc state, not a new dashboard.
+**Alternatives considered:** Keeping Admin/RCIC dashboards deferred and
+only patching the questionnaire-visibility gap — rejected since the
+per-client dashboard is what actually makes /sandbox demonstrate one
+continuous flow rather than disconnected list pages; a real PDF-
+generation library (e.g. a server-side renderer) for the CIF export —
+rejected as unnecessary complexity when the browser's own print-to-PDF
+already satisfies "download as PDF" for this use case; section-level
+questionnaire flagging for Admin — rejected per the user's own
+reasoning that the client-facing progress indicator already covers it.
