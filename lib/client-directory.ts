@@ -6,6 +6,7 @@ import { SECTION_LABELS } from "./questionnaire-fields.ts";
 import { getApplicationStage, type ApplicationStageInfo } from "./application-stage.ts";
 import { getApplicationSubmissionStore } from "./application-submission-store.ts";
 import type { SubmissionState } from "./application-submission-transitions.ts";
+import { STATUS_LABEL } from "./status-display.ts";
 import type { ChecklistItemStatus, QuestionnaireSectionId, VisaType } from "./types.ts";
 
 export interface ClientSummary {
@@ -57,4 +58,83 @@ export function getAllClientSummaries(): ClientSummary[] {
   return getChecklistStore()
     .getAllClientIds()
     .map((clientId) => getClientSummary(clientId));
+}
+
+export interface AdminOverviewStats {
+  activeClients: number;
+  submittedItems: number;
+  clientFollowUps: number;
+  readyForRcic: number;
+}
+
+// Per docs/CURRENT_USER_FLOW_V2.md's Admin role: triage submitted
+// documents, flag what's missing, forward reviewed items to RCIC.
+export function getAdminOverviewStats(): AdminOverviewStats {
+  const summaries = getAllClientSummaries();
+  let submittedItems = 0;
+  let clientFollowUps = 0;
+  let readyForRcic = 0;
+  for (const summary of summaries) {
+    submittedItems += summary.checklistCounts.submitted;
+    readyForRcic += summary.checklistCounts.under_review;
+    clientFollowUps += summary.checklistCounts.required + summary.checklistCounts.changes_required;
+  }
+  return { activeClients: summaries.length, submittedItems, clientFollowUps, readyForRcic };
+}
+
+export interface RcicOverviewStats {
+  activeClients: number;
+  awaitingReview: number;
+  changesRequested: number;
+  readyToSubmit: number;
+}
+
+// Per docs/CURRENT_USER_FLOW_V2.md's RCIC role: final review/approval,
+// and (Phase 5) sending the packaged file to IRCC.
+export function getRcicOverviewStats(): RcicOverviewStats {
+  const summaries = getAllClientSummaries();
+  let awaitingReview = 0;
+  let changesRequested = 0;
+  let readyToSubmit = 0;
+  for (const summary of summaries) {
+    awaitingReview += summary.checklistCounts.under_review;
+    changesRequested += summary.checklistCounts.changes_required;
+    if (summary.submissionState === "packaged") readyToSubmit++;
+  }
+  return { activeClients: summaries.length, awaitingReview, changesRequested, readyToSubmit };
+}
+
+export type ItemOwner = "Client" | "Admin" | "RCIC";
+
+const ITEM_OWNER: Record<Exclude<ChecklistItemStatus, "approved">, ItemOwner> = {
+  required: "Client",
+  submitted: "Admin",
+  under_review: "RCIC",
+  changes_required: "Client",
+};
+
+export interface NeedsAttentionRow {
+  clientId: string;
+  itemLabel: string;
+  statusLabel: string;
+  owner: ItemOwner;
+}
+
+// Cross-client "needs attention" table for the Admin/RCIC workspace
+// overview — every checklist item that isn't approved yet.
+export function getNeedsAttentionRows(): NeedsAttentionRow[] {
+  const rows: NeedsAttentionRow[] = [];
+  for (const clientId of getChecklistStore().getAllClientIds()) {
+    const { items } = getClientChecklist(clientId);
+    for (const item of items) {
+      if (item.status === "approved") continue;
+      rows.push({
+        clientId,
+        itemLabel: item.label,
+        statusLabel: STATUS_LABEL[item.status],
+        owner: ITEM_OWNER[item.status],
+      });
+    }
+  }
+  return rows;
 }

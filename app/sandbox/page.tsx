@@ -12,7 +12,11 @@ interface Phase {
 // already-built pages (not sandbox copies) — this is a flow map over
 // the existing app, not a separate mock product.
 const PHASES: Phase[] = [
-  { label: "Phase 1 — Onboarding", href: "/signup", note: "Sign up / log in" },
+  {
+    label: "Phase 1 — Onboarding",
+    href: "/admin/invitations",
+    note: "Admin invites a client (real invite-gated signup)",
+  },
   { label: "Phase 2 — Client Intake", href: "/questionnaire", note: "CIF questionnaire" },
   { label: "Phase 3 — Documentation Collection", href: "/checklist", note: "Document checklist" },
   {
