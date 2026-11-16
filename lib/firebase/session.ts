@@ -29,7 +29,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   }
 
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) return null;
+  if (!sessionCookie || !adminAuth || !adminDb) return null;
 
   try {
     const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);

@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlowOui (StayInCanada) — client portal sandbox
 
-## Getting Started
+A clickable sandbox of the FlowOui client portal and staff workspace, built
+from the Hi-Fi Figma file. It runs entirely on mock data held in memory, so
+there is nothing to configure: clone, install, run, and start from the demo
+inbox.
 
-First, run the development server:
+## Run it locally
+
+You need **Node.js 20.9 or newer** and npm.
 
 ```bash
+git clone https://github.com/hye-soo/StayInCanada_SandBox.git
+cd StayInCanada_SandBox
+git checkout hye-sandbox-v2   # the branch with the full sandbox
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open **http://localhost:3000/demo**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+No `.env.local` is needed. Without Firebase settings the app runs on the mock
+users only (Firebase sign-in is optional and only used if you add the keys).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Start from the demo inbox (`/demo`)
 
-## Learn More
+`/demo` looks like an email inbox with Alice's invitation. Along the bottom
+are three demo controls:
 
-To learn more about Next.js, take a look at the following resources:
+| Button | What it does |
+| --- | --- |
+| **Reset demo** | Back to the start: Alice invited but not signed up, empty intake and documents, no memos, everyone signed out. |
+| **Fill Alice's intake** | Fills in all 25 intake questions with sample answers (not submitted), so you can jump straight to review and submit. |
+| **Fill Alice's documents** | Sets Alice's document checklist to a mix of states (needs changes, required, submitted, in review, completed) and adds matching memos and updates. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All sample data is invented (example.com emails, fake addresses).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Demo accounts
 
-## Deploy on Vercel
+| Who | Email | Lands on |
+| --- | --- | --- |
+| Alice Chang (client) | `alice@example.com` | `/dashboard` |
+| Maya Patel (staff / admin) | `maya@example.com` | `/admin` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The demo passwords are in [`lib/data/mock-users.ts`](lib/data/mock-users.ts).
+Sign in at **http://localhost:3000/login**. Alice can also create her account
+from the invitation: **Accept invitation** in the demo inbox opens
+`/invite/welcome-alice`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Suggested walkthroughs
+
+**Full client journey (from scratch)**
+
+1. `/demo` → **Reset demo** → **Accept invitation** → create Alice's account.
+2. Overview → **My Intake** → answer questions (or press **Fill Alice's intake** on `/demo` to skip ahead).
+3. After the last question: **Start review** → check each section, edit with the pop-up, see **Review PDF**.
+4. Tick the confirmation → **Send to case team** → success pop-up → **View intake status**.
+5. **Request correction** to send the team a note about a submitted answer.
+
+**Documents and memos (quick)**
+
+1. `/demo` → **Fill Alice's intake** and **Fill Alice's documents**, then sign in as Alice.
+2. **Document Checklist** → open **Passport** (needs changes) to see the team's memo and replace the file, or **Proof of Financial Support** to upload a PDF (max 4 MB) and preview it with **View submitted file**.
+3. **Updates & Memo** → reply to the passport memo, send a **New memo**, filter by Action needed / Unread.
+
+**Staff side**
+
+Sign in as Maya → **Overview** and **All clients** → open Alice → **Intake**
+tab to review sections (marking one reviewed switches Alice's My Intake to
+"under review").
+
+## Good to know
+
+- **Data lives in memory.** Restarting `npm run dev` (or editing some source files) clears it. Use the `/demo` buttons to get back to a known state.
+- **Uploads** must be PDFs up to 4 MB. They're kept in memory only so you can preview them; nothing is stored anywhere.
+- **Download PDF** (Review PDF tab) opens the browser's print dialog; choose "Save as PDF".
+- Pages are built for desktop (1440 px Figma frames) and stack on smaller screens.
+
+## Scripts
+
+```bash
+npm run dev     # dev server on http://localhost:3000
+npm test        # unit tests (node --test)
+npm run lint    # ESLint
+npm run build   # production build
+```
+
+## Where things are
+
+| Path | What's there |
+| --- | --- |
+| `app/(auth)` | A01 accept invitation, A02 sign in |
+| `app/(client)` | Client portal: dashboard, questionnaire (My Intake), checklist, updates, profile |
+| `app/admin`, `app/rcic` | Staff workspaces |
+| `app/demo` | Demo inbox and the reset / fill buttons |
+| `components/ui`, `components/patterns`, `components/layouts` | Reusable building blocks, then composed patterns, then page shells |
+| `lib/` | In-memory stores, business logic and their tests (`*.test.ts`) |
+| `lib/data/` | Intake questions, mock users and the demo sample data |
+| `docs/` | Decisions, implementation plan and user flows |
+
+Project conventions are in [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md).

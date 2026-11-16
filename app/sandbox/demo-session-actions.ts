@@ -15,5 +15,6 @@ export async function mintDemoToken(role: UserRole): Promise<string> {
       `No demo account configured for role "${role}" — set DEMO_${role.toUpperCase()}_UID in .env.local`
     );
   }
+  if (!adminAuth) throw new Error("Firebase isn't configured (.env.local).");
   return adminAuth.createCustomToken(uid);
 }

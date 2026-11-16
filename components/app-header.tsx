@@ -42,7 +42,7 @@ export function AppHeader({ user }: { user: HeaderUser | null }) {
   if (FULL_BLEED_PATHS.some((path) => pathname.startsWith(path))) return null;
 
   async function handleLogOut() {
-    await signOut(auth);
+    if (auth) await signOut(auth);
     await clearSession();
     router.push("/login");
     router.refresh();

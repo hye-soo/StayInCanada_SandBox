@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { Trash2 } from "lucide-react";
 import { cn } from "cn";
 import type { IntakeField, IntakeStep } from "@/lib/data/intake-steps.ts";
 import { isFieldDisabled, type StepAnswer } from "@/lib/intake.ts";
@@ -144,7 +145,12 @@ interface StepFieldsProps {
 export function StepFields({ step, answer, prefix = "", errors, singleColumn, onGateChange }: StepFieldsProps) {
   const values = answer?.values ?? {};
   const [gate, setGate] = useState(step.gate ? values[step.gate.name] : undefined);
-  const [entryCount, setEntryCount] = useState(Math.max(answer?.entries?.length ?? 0, 1));
+  // Each entry keeps a stable key, so removing one keeps what was typed in
+  // the others (inputs are uncontrolled); names are renumbered by position.
+  const [entries, setEntries] = useState(() =>
+    (answer?.entries?.length ? answer.entries : [undefined]).map((saved, key) => ({ key, saved }))
+  );
+  const [nextKey, setNextKey] = useState(entries.length);
   // Live dropdown answers, so dependent fields grey out as soon as
   // their controlling answer rules them out (Single, No).
   const [answers, setAnswers] = useState<Record<string, string | undefined>>(values);
@@ -169,10 +175,25 @@ export function StepFields({ step, answer, prefix = "", errors, singleColumn, on
             />
           </Field>
         ) : null}
-        {Array.from({ length: entryCount }, (_, index) => (
-          <fieldset key={index} disabled={!entriesOpen} className={cn(grid, index > 0 && "border-t border-border pt-4")}>
-            {entryCount > 1 ? (
-              <legend className="mb-1 text-sm font-medium text-muted-foreground">Entry {index + 1}</legend>
+        {entries.map(({ key, saved }, index) => (
+          <fieldset
+            key={key}
+            disabled={!entriesOpen}
+            aria-label={entries.length > 1 ? `Entry ${index + 1}` : undefined}
+            className={cn(grid, index > 0 && "border-t border-border pt-4")}
+          >
+            {entries.length > 1 ? (
+              <div className={cn("flex items-center justify-between", !singleColumn && "sm:col-span-2")}>
+                <span className="text-sm font-medium text-muted-foreground">Entry {index + 1}</span>
+                <button
+                  type="button"
+                  aria-label={`Remove entry ${index + 1}`}
+                  onClick={() => setEntries((current) => current.filter((entry) => entry.key !== key))}
+                  className="flex size-9 items-center justify-center rounded-full text-foreground hover:bg-secondary disabled:text-muted-foreground"
+                >
+                  <Trash2 className="size-5" strokeWidth={1.75} aria-hidden />
+                </button>
+              </div>
             ) : null}
             {step.fields.map((field) => {
               const name = `${prefix}entry-${index}-${field.name}`;
@@ -181,7 +202,7 @@ export function StepFields({ step, answer, prefix = "", errors, singleColumn, on
                   <FieldControl
                     field={field}
                     name={name}
-                    value={answer?.entries?.[index]?.[field.name]}
+                    value={saved?.[field.name]}
                     disabled={!entriesOpen}
                     invalid={errors.has(name)}
                   />
@@ -193,7 +214,10 @@ export function StepFields({ step, answer, prefix = "", errors, singleColumn, on
         {entriesOpen ? (
           <button
             type="button"
-            onClick={() => setEntryCount((count) => count + 1)}
+            onClick={() => {
+              setEntries((current) => [...current, { key: nextKey, saved: undefined }]);
+              setNextKey((key) => key + 1);
+            }}
             className="flex h-12 w-60 items-center gap-2 rounded-md p-3 text-sm font-semibold text-primary hover:bg-secondary"
           >
             <Icon src="/icons/plus-small.svg" className="size-6" />

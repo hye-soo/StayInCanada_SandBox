@@ -45,7 +45,7 @@ export function SidebarNav({ items }: { items: SidebarNavItem[] }) {
       .sort((a, b) => b.length - a.length)[0] ?? items.find((item) => item.fallback)?.href;
 
   async function handleSignOut() {
-    await signOut(auth);
+    if (auth) await signOut(auth);
     await clearSession();
     router.push("/login");
     router.refresh();

@@ -1,8 +1,8 @@
 "use client";
 
 import { getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,8 +13,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// No Firebase config (a fresh clone without .env.local): auth is off and
+// the app runs on the mock users only.
 // ponytail: guard against re-initializing on every module reload
-const app = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
+const app = firebaseConfig.apiKey ? (getApps()[0] ?? initializeApp(firebaseConfig)) : undefined;
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth: Auth | undefined = app ? getAuth(app) : undefined;
+export const db: Firestore | undefined = app ? getFirestore(app) : undefined;

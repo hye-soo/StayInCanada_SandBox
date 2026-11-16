@@ -9,7 +9,7 @@ export function SignOutLink() {
   const router = useRouter();
 
   async function handleSignOut() {
-    await signOut(auth);
+    if (auth) await signOut(auth);
     await clearSession();
     router.push("/login");
   }

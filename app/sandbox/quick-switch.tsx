@@ -27,6 +27,7 @@ export function QuickSwitch() {
     setPending(role);
     try {
       const token = await mintDemoToken(role);
+      if (!auth) throw new Error("Firebase isn't configured (.env.local).");
       const credential = await signInWithCustomToken(auth, token);
       await createSession(await credential.user.getIdToken());
       router.push(ROLE_LANDING[role]);

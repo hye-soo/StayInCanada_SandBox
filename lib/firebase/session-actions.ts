@@ -10,6 +10,7 @@ const SESSION_EXPIRES_IN_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
 // the fresh ID token. Verifies it via Admin SDK and mints an httpOnly
 // session cookie the server can trust on later requests.
 export async function createSession(idToken: string) {
+  if (!adminAuth) throw new Error("Firebase isn't configured (.env.local); use the mock sign-in.");
   const sessionCookie = await adminAuth.createSessionCookie(idToken, {
     expiresIn: SESSION_EXPIRES_IN_MS,
   });
