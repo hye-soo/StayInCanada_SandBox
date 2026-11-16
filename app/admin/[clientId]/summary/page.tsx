@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/firebase/session.ts";
-import { getClientQuestionnaire } from "@/lib/client-questionnaire.ts";
+import { getClientIntake } from "@/lib/client-questionnaire.ts";
 import { QuestionnaireSummary } from "@/components/questionnaire-summary.tsx";
 import { PrintButton } from "@/components/print-button.tsx";
 
@@ -11,7 +11,7 @@ export default async function AdminClientSummaryPage({
 }) {
   await requireRole(["admin"]);
   const { clientId } = await params;
-  const response = getClientQuestionnaire(clientId);
+  const answers = getClientIntake(clientId);
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-16">
@@ -24,7 +24,7 @@ export default async function AdminClientSummaryPage({
       <h1 className="text-2xl font-semibold tracking-tight">
         Client {clientId} — Client Information Form
       </h1>
-      <QuestionnaireSummary response={response} />
+      <QuestionnaireSummary answers={answers} />
     </main>
   );
 }

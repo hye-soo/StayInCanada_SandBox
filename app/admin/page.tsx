@@ -1,114 +1,91 @@
-import Link from "next/link";
 import { requireRole } from "@/lib/firebase/session.ts";
-import { getAdminOverviewStats, getNeedsAttentionRows } from "@/lib/client-directory.ts";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getChecklistStore } from "@/lib/checklist-store.ts";
+import { getClientChecklist, VISA_TYPE_LABEL } from "@/lib/client-checklist.ts";
+import { getClientProfile } from "@/lib/client-profile.ts";
+import { getClientIdentity } from "@/lib/client-identity.ts";
+import { getAdminOverview, type OverviewClient } from "@/lib/staff-overview.ts";
+import { formatTimeAgo } from "@/lib/format-time.ts";
+import { PageHeader } from "@/components/layouts/page-header";
+import { ArrowLink } from "@/components/ui/arrow-link";
+import { CaseListCard } from "@/components/patterns/case-list-card";
+import { DataTable } from "@/components/patterns/data-table";
+import { StatCard } from "@/components/patterns/stat-card";
 
+function overviewClient(clientId: string): OverviewClient {
+  const { visaType, items } = getClientChecklist(clientId);
+  return {
+    clientId,
+    name: getClientIdentity(clientId).name,
+    applicationId: getClientProfile(clientId).applicationId,
+    visaTypeLabel: VISA_TYPE_LABEL[visaType],
+    items,
+  };
+}
+
+// S01 / Figma "S01 Staff dashboard" (Admin).
 export default async function AdminOverviewPage() {
-  await requireRole(["admin"]);
-  const stats = getAdminOverviewStats();
-  const rows = getNeedsAttentionRows();
+  const { displayName, email } = await requireRole(["admin"]);
+  const firstName = displayName?.split(" ")[0] ?? email?.split("@")[0] ?? "there";
+  const overview = getAdminOverview(getChecklistStore().getAllClientIds().map(overviewClient));
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-16">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Your workspace</h1>
-        <p className="text-sm text-muted-foreground">
-          Admin overview • Client work, submissions and follow-ups
-        </p>
+    <main className="flex flex-col gap-4 pt-2 lg:pt-[30px]">
+      <div className="mb-4">
+        <PageHeader title={`Your workspace, ${firstName}!`} subtitle="Have a wonderful day today!" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">Active clients</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{stats.activeClients}</p>
-            <p className="text-xs text-muted-foreground">Across assigned applications</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">Submitted items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{stats.submittedItems}</p>
-            <p className="text-xs text-muted-foreground">Waiting for a quality check</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">Client follow-ups</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{stats.clientFollowUps}</p>
-            <p className="text-xs text-muted-foreground">Missing or changed items</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">Ready for RCIC</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{stats.readyForRcic}</p>
-            <p className="text-xs text-muted-foreground">Admin review completed</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <StatCard label="My active cases" value={overview.activeCases} />
+        <StatCard label="Awaiting my review" value={overview.awaitingReview} />
+        <StatCard label="Waiting on clients" value={overview.waitingOnClients} />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button render={<Link href="/admin/invitations">Invite a client</Link>} />
-        <Button variant="outline" render={<Link href="/admin/clients">View all clients</Link>} />
-        <Button
-          variant="outline"
-          render={<Link href="/admin/clients?status=needs_attention">Review submissions</Link>}
+      <DataTable
+        title="My review queue"
+        meta="Oldest first"
+        columns={["Client", "Needs review", "Received", "Action"]}
+        emptyMessage="Nothing to review right now."
+        rows={overview.reviewQueue.map((row) => ({
+          key: `${row.clientId}-${row.itemId}`,
+          cells: [
+            <span key="client" className="flex flex-col gap-[3px]">
+              <span className="font-semibold">{row.clientName}</span>
+              <span className="text-muted-foreground">{row.applicationId}</span>
+            </span>,
+            row.needsReview,
+            row.receivedAt ? formatTimeAgo(row.receivedAt) : "—",
+            <ArrowLink key="action" href={row.href}>
+              {row.actionLabel}
+            </ArrowLink>,
+          ],
+        }))}
+      />
+
+      <div className="mt-6 grid grid-cols-1 gap-[15px] md:grid-cols-2">
+        <CaseListCard
+          title="Waiting on clients"
+          icon="/icons/clock.svg"
+          actionLabel="View request"
+          emptyMessage="No client owes anything right now."
+          entries={overview.waitingOnClient.slice(0, 3).map((entry) => ({
+            key: entry.clientId,
+            name: entry.clientName,
+            detail: entry.detail,
+            href: entry.href,
+          }))}
         />
-      </div>
-
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
-            <tr>
-              <th className="p-3 font-medium">Client</th>
-              <th className="p-3 font-medium">Needs attention</th>
-              <th className="p-3 font-medium">Owner</th>
-              <th className="p-3 font-medium">Open</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td className="p-3 text-muted-foreground" colSpan={4}>
-                  Nothing needs attention right now.
-                </td>
-              </tr>
-            ) : (
-              rows.map((row, index) => (
-                <tr key={`${row.clientId}-${index}`} className="border-t border-border">
-                  <td className="p-3">Client {row.clientId}</td>
-                  <td className="p-3">
-                    {row.itemLabel} · {row.statusLabel}
-                  </td>
-                  <td className="p-3">{row.owner}</td>
-                  <td className="p-3">
-                    <Link href={`/admin/${row.clientId}`} className="hover:underline">
-                      Open profile
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="rounded-[var(--radius-lg)] border border-border bg-muted/50 p-6">
-        <h2 className="text-lg font-semibold">Your next handoff</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Check readability and completeness, flag any issues, then notify the RCIC when the file
-          is ready for validation.
-        </p>
+        <CaseListCard
+          title="Ready for consultant review"
+          icon="/icons/folder.svg"
+          actionLabel="Open handoff"
+          emptyMessage="Nothing is with the consultant yet."
+          entries={overview.readyForConsultant.slice(0, 3).map((entry) => ({
+            key: entry.clientId,
+            name: entry.clientName,
+            detail: entry.detail,
+            href: entry.href,
+          }))}
+        />
       </div>
     </main>
   );

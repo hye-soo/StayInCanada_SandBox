@@ -2,52 +2,49 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getQuestionnaireStore } from "./questionnaire-store.ts";
 
-test("a never-before-seen client gets a fresh, empty draft", () => {
-  const store = getQuestionnaireStore();
-  const draft = store.getDraft("uid-q-1");
-
-  assert.deepEqual(draft.applicantInfo, {});
-  assert.deepEqual(draft.employment, []);
-  assert.deepEqual(draft.children, []);
-  assert.deepEqual(draft.siblings, []);
-  assert.deepEqual(draft.travelHistory, { entries: [] });
-  assert.deepEqual(draft.parents, { mother: {}, father: {} });
+test("a never-before-seen client has no answers yet", () => {
+  assert.deepEqual(getQuestionnaireStore().getAnswers("uid-q-1"), {});
 });
 
-test("updateSection replaces just that section, leaving others untouched", () => {
+test("saveStep replaces just that step, leaving others untouched", () => {
   const store = getQuestionnaireStore();
-  store.updateSection("uid-q-2", "applicantInfo", { firstName: "Jordan" });
+  store.saveStep("uid-q-2", "legal-identity", { values: { firstName: "Jordan" } });
+  store.saveStep("uid-q-2", "passport", { values: { passportNumber: "X1" } });
+  store.saveStep("uid-q-2", "legal-identity", { values: { firstName: "Jo" } });
 
-  const draft = store.getDraft("uid-q-2");
-  assert.equal(draft.applicantInfo.firstName, "Jordan");
-  assert.deepEqual(draft.employment, []);
+  const answers = store.getAnswers("uid-q-2");
+  assert.equal(answers["legal-identity"]?.values.firstName, "Jo");
+  assert.equal(answers.passport?.values.passportNumber, "X1");
 });
 
-test("the same client's draft persists across repeated access", () => {
+test("different clients have independent answers", () => {
   const store = getQuestionnaireStore();
-  store.updateSection("uid-q-3", "applicantInfo", { lastName: "Lee" });
-
-  const draft = store.getDraft("uid-q-3");
-  assert.equal(draft.applicantInfo.lastName, "Lee");
+  store.saveStep("uid-q-4a", "legal-identity", { values: { firstName: "A" } });
+  assert.deepEqual(store.getAnswers("uid-q-4b"), {});
 });
 
-test("getLastSavedAt is unset until the first save, then updates on each save", () => {
+test("getLastSavedAt is unset until the first save", () => {
   const store = getQuestionnaireStore();
   assert.equal(store.getLastSavedAt("uid-q-5"), undefined);
-
   const before = Date.now();
-  store.updateSection("uid-q-5", "applicantInfo", { firstName: "Jordan" });
-  const savedAt = store.getLastSavedAt("uid-q-5");
-
-  assert.ok(savedAt);
-  assert.ok(savedAt >= before);
+  store.saveStep("uid-q-5", "legal-identity", { values: {} });
+  assert.ok((store.getLastSavedAt("uid-q-5") ?? 0) >= before);
 });
 
-test("different clients have independent drafts", () => {
+test("getSubmittedAt is unset until markSubmitted is called", () => {
   const store = getQuestionnaireStore();
-  store.updateSection("uid-q-4a", "applicantInfo", { firstName: "A" });
-  store.updateSection("uid-q-4b", "applicantInfo", { firstName: "B" });
+  assert.equal(store.getSubmittedAt("uid-q-6"), undefined);
+  const before = Date.now();
+  store.markSubmitted("uid-q-6");
+  assert.ok((store.getSubmittedAt("uid-q-6") ?? 0) >= before);
+});
 
-  assert.equal(store.getDraft("uid-q-4a").applicantInfo.firstName, "A");
-  assert.equal(store.getDraft("uid-q-4b").applicantInfo.firstName, "B");
+test("markReviewStarted keeps the first time the review was opened", () => {
+  const store = getQuestionnaireStore();
+  assert.equal(store.getReviewStartedAt("uid-q-7"), undefined);
+  store.markReviewStarted("uid-q-7");
+  const first = store.getReviewStartedAt("uid-q-7");
+  assert.ok(first !== undefined);
+  store.markReviewStarted("uid-q-7");
+  assert.equal(store.getReviewStartedAt("uid-q-7"), first);
 });

@@ -1,13 +1,13 @@
 import { requireRole } from "@/lib/firebase/session.ts";
 import { getClientChecklist } from "@/lib/client-checklist.ts";
-import { getClientQuestionnaire } from "@/lib/client-questionnaire.ts";
-import { getClientSummary, needsRcicValidation } from "@/lib/client-directory.ts";
-import { getSectionStatus } from "@/lib/questionnaire-progress.ts";
 import {
-  SECTION_LABELS,
-  SECTION_STATUS_BADGE_CLASS,
-  SECTION_STATUS_LABEL,
-} from "@/lib/questionnaire-fields.ts";
+  getClientIntake,
+  getClientQuestionnaireSubmittedAt,
+} from "@/lib/client-questionnaire.ts";
+import { getClientSummary, needsRcicValidation } from "@/lib/client-directory.ts";
+import { getCategoryStatus, INTAKE_STATUS_BADGE_CLASS, INTAKE_STATUS_LABEL } from "@/lib/intake.ts";
+import { INTAKE_CATEGORIES } from "@/lib/data/intake-steps.ts";
+import { STATUS_BADGE_CLASS, STATUS_LABEL } from "@/lib/status-display.ts";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { approveItem, requestChanges } from "./actions.ts";
-import type { QuestionnaireSectionId } from "@/lib/types.ts";
+import { approveItem, flagForAdmin } from "./actions.ts";
 
 export default async function RcicClientPage({
   params,
@@ -34,8 +33,8 @@ export default async function RcicClientPage({
   const { clientId } = await params;
   const { error } = await searchParams;
   const { items } = getClientChecklist(clientId);
-  const questionnaire = getClientQuestionnaire(clientId);
-  const sectionIds = Object.keys(SECTION_LABELS) as QuestionnaireSectionId[];
+  const answers = getClientIntake(clientId);
+  const submittedAt = getClientQuestionnaireSubmittedAt(clientId);
   const summary = getClientSummary(clientId);
 
   return (
@@ -53,17 +52,22 @@ export default async function RcicClientPage({
             View / download CIF summary
           </Link>
         </div>
+        <p className="text-xs text-muted-foreground">
+          {submittedAt
+            ? `Intake submitted ${new Date(submittedAt).toLocaleString()}`
+            : "Intake not yet submitted by the client"}
+        </p>
         <ul className="flex flex-col gap-2">
-          {sectionIds.map((sectionId) => {
-            const status = getSectionStatus(questionnaire, sectionId);
+          {INTAKE_CATEGORIES.map((category) => {
+            const status = getCategoryStatus(category.id, answers);
             return (
               <li
-                key={sectionId}
+                key={category.id}
                 className="flex items-center justify-between rounded-[var(--radius-md)] border border-border p-3"
               >
-                <span className="text-sm">{SECTION_LABELS[sectionId]}</span>
-                <Badge variant="outline" className={SECTION_STATUS_BADGE_CLASS[status]}>
-                  {SECTION_STATUS_LABEL[status]}
+                <span className="text-sm">{category.label}</span>
+                <Badge variant="outline" className={INTAKE_STATUS_BADGE_CLASS[status]}>
+                  {INTAKE_STATUS_LABEL[status]}
                 </Badge>
               </li>
             );
@@ -76,11 +80,13 @@ export default async function RcicClientPage({
         {items.map((item) => (
           <Card key={item.id}>
             <CardHeader>
-              <CardTitle>{item.label}</CardTitle>
-              <CardDescription>
-                {item.status}
-                {item.fileName ? ` — ${item.fileName}` : ""}
-              </CardDescription>
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle>{item.label}</CardTitle>
+                <Badge variant="outline" className={STATUS_BADGE_CLASS[item.status]}>
+                  {STATUS_LABEL[item.status]}
+                </Badge>
+              </div>
+              {item.fileName ? <CardDescription>{item.fileName}</CardDescription> : null}
             </CardHeader>
             {item.status === "under_review" ? (
               <>
@@ -110,17 +116,17 @@ export default async function RcicClientPage({
                     </div>
                   ) : null}
                   <form
-                    action={requestChanges.bind(null, clientId, item.id)}
+                    action={flagForAdmin.bind(null, clientId, item.id)}
                     className="flex flex-col gap-2"
                   >
                     <Textarea
-                      name="comment"
-                      placeholder="What needs to change?"
+                      name="note"
+                      placeholder="What needs to change? (internal note to Admin — Admin contacts the client)"
                       required
                       className="text-sm"
                     />
                     <Button type="submit" variant="outline" className="self-start">
-                      Request changes
+                      Flag for Admin
                     </Button>
                   </form>
                 </CardContent>

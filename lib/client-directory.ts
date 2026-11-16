@@ -1,13 +1,11 @@
 import { getChecklistStore } from "./checklist-store.ts";
 import { getClientChecklist, VISA_TYPE_LABEL } from "./client-checklist.ts";
-import { getClientQuestionnaire } from "./client-questionnaire.ts";
-import { getSectionStatus } from "./questionnaire-progress.ts";
-import { SECTION_LABELS } from "./questionnaire-fields.ts";
+import { getClientIntake } from "./client-questionnaire.ts";
+import { getIntakeProgress } from "./intake.ts";
 import { getApplicationStage, type ApplicationStageInfo } from "./application-stage.ts";
 import { getApplicationSubmissionStore } from "./application-submission-store.ts";
 import type { ApplicationSubmission } from "./application-submission-transitions.ts";
-import { STATUS_LABEL } from "./status-display.ts";
-import type { ChecklistItemStatus, QuestionnaireSectionId, VisaType } from "./types.ts";
+import type { ChecklistItemStatus, VisaType } from "./types.ts";
 
 export interface ClientSummary {
   clientId: string;
@@ -20,18 +18,12 @@ export interface ClientSummary {
   submission: ApplicationSubmission;
 }
 
-const SECTION_IDS = Object.keys(SECTION_LABELS) as QuestionnaireSectionId[];
-
 // Pure aggregation over the existing per-client stores — no new data
 // model, just a combined read for the Admin/RCIC client list and
 // per-client detail pages (docs/IMPLEMENTATION_PLAN.md Phase 4).
 export function getClientSummary(clientId: string): ClientSummary {
   const { visaType, items } = getClientChecklist(clientId);
-  const questionnaire = getClientQuestionnaire(clientId);
-
-  const questionnaireComplete = SECTION_IDS.filter(
-    (sectionId) => getSectionStatus(questionnaire, sectionId) === "complete"
-  ).length;
+  const { completeCategories, totalCategories } = getIntakeProgress(getClientIntake(clientId));
 
   const checklistCounts: Record<ChecklistItemStatus, number> = {
     required: 0,
@@ -46,8 +38,9 @@ export function getClientSummary(clientId: string): ClientSummary {
     clientId,
     visaType,
     visaTypeLabel: VISA_TYPE_LABEL[visaType],
-    questionnaireComplete,
-    questionnaireTotal: SECTION_IDS.length,
+    // Intake progress is counted in categories (Personal, Family, …).
+    questionnaireComplete: completeCategories,
+    questionnaireTotal: totalCategories,
     checklistCounts,
     stage: getApplicationStage(items),
     submission: getApplicationSubmissionStore().get(clientId),
@@ -120,35 +113,53 @@ export function needsSubmissionRecording(summary: ClientSummary): boolean {
 
 export type ItemOwner = "Client" | "Admin" | "RCIC";
 
-const ITEM_OWNER: Record<Exclude<ChecklistItemStatus, "approved">, ItemOwner> = {
-  required: "Client",
-  submitted: "Admin",
-  under_review: "RCIC",
-  changes_required: "Client",
-};
-
-export interface NeedsAttentionRow {
+export interface ClientQueueRow {
   clientId: string;
-  itemLabel: string;
-  statusLabel: string;
-  owner: ItemOwner;
+  stageLabel: string;
+  nextAction: string;
+  owner: ItemOwner | "Done";
 }
 
-// Cross-client "needs attention" table for the Admin/RCIC workspace
-// overview — every checklist item that isn't approved yet.
-export function getNeedsAttentionRows(): NeedsAttentionRow[] {
-  const rows: NeedsAttentionRow[] = [];
-  for (const clientId of getChecklistStore().getAllClientIds()) {
-    const { items } = getClientChecklist(clientId);
-    for (const item of items) {
-      if (item.status === "approved") continue;
-      rows.push({
-        clientId,
-        itemLabel: item.label,
-        statusLabel: STATUS_LABEL[item.status],
-        owner: ITEM_OWNER[item.status],
-      });
-    }
+// What a staff member should do next for this client, right now — one
+// decision per client (not per item), in pipeline order so the
+// furthest-along pending step wins when several items are mid-flight
+// at once (per-item review already happens in parallel; this is just
+// which single action is most useful to surface on the overview).
+function getNextAction(summary: ClientSummary): { nextAction: string; owner: ItemOwner | "Done" } {
+  const { submission, checklistCounts } = summary;
+  if (submission.state === "approved_for_submission") {
+    return { nextAction: "Record submission to IRCC", owner: "RCIC" };
   }
-  return rows;
+  if (submission.state === "package_prepared") {
+    return { nextAction: "Approve package for submission", owner: "RCIC" };
+  }
+  if (submission.state === "validated") {
+    return { nextAction: "Prepare package", owner: "Admin" };
+  }
+  if (submission.state === "submitted_to_ircc") {
+    return { nextAction: "Submitted to IRCC — no action needed", owner: "Done" };
+  }
+  if (needsRcicValidation(summary)) {
+    return { nextAction: "Validate requirements & hand off", owner: "RCIC" };
+  }
+  if (checklistCounts.under_review > 0) {
+    return { nextAction: "Review documents", owner: "RCIC" };
+  }
+  if (checklistCounts.submitted > 0) {
+    return { nextAction: "Quality check documents", owner: "Admin" };
+  }
+  if (checklistCounts.required > 0 || checklistCounts.changes_required > 0) {
+    return { nextAction: "Waiting on client", owner: "Client" };
+  }
+  return { nextAction: "Waiting on client intake", owner: "Client" };
+}
+
+// One row per client for the Admin/RCIC workspace overview — the
+// previous version listed one row per non-approved checklist item,
+// which repeated the same client many times (docs/DECISIONS.md).
+export function getClientQueueRows(): ClientQueueRow[] {
+  return getAllClientSummaries().map((summary) => {
+    const { nextAction, owner } = getNextAction(summary);
+    return { clientId: summary.clientId, stageLabel: summary.stage.label, nextAction, owner };
+  });
 }

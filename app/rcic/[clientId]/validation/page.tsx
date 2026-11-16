@@ -171,6 +171,12 @@ export default async function RcicValidationPage({
                     Client authorization (signed)
                   </li>
                 </ul>
+                <Link
+                  href={`/rcic/${clientId}/package`}
+                  className="self-start text-sm underline"
+                >
+                  Download package
+                </Link>
               </CardContent>
             </Card>
 
@@ -213,6 +219,9 @@ export default async function RcicValidationPage({
               Package v{submission.package?.version} was approved. Complete the submission through
               the appropriate IRCC account, then record the details here.
             </p>
+            <Link href={`/rcic/${clientId}/package`} className="text-sm underline">
+              Download package
+            </Link>
           </div>
 
           <form
@@ -283,6 +292,9 @@ export default async function RcicValidationPage({
             <p className="text-sm text-muted-foreground">
               Recorded by {submission.record.submittedBy} on {submission.record.submissionDate}
             </p>
+            <Link href={`/rcic/${clientId}/package`} className="text-sm underline">
+              Download package
+            </Link>
           </div>
 
           <Card>

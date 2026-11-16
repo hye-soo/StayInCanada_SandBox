@@ -101,3 +101,8 @@ export function getChecklistStore(): ChecklistStore {
   if (!store) store = new InMemoryChecklistStore();
   return store;
 }
+
+// Demo only: forget every client's checklist.
+export function resetChecklistStore(): void {
+  store = undefined;
+}

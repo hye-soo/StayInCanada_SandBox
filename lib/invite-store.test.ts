@@ -32,6 +32,17 @@ test("two created invites get distinct tokens", () => {
   assert.notEqual(a.token, b.token);
 });
 
+test("an invite carries the client's name when one is given", () => {
+  const invite = getInviteStore().create("named@example.com", "Named Client");
+  assert.equal(getInviteStore().get(invite.token)?.name, "Named Client");
+});
+
+test("the mock invitation for Alice is seeded", () => {
+  const invite = getInviteStore().get("welcome-alice");
+  assert.equal(invite?.name, "Alice Chang");
+  assert.equal(isInviteValid(invite), true);
+});
+
 test("isInviteValid: true for an unused invite, false for missing/used", () => {
   const invite = getInviteStore().create("valid@example.com");
   assert.equal(isInviteValid(invite), true);
@@ -39,4 +50,12 @@ test("isInviteValid: true for an unused invite, false for missing/used", () => {
 
   getInviteStore().markUsed(invite.token);
   assert.equal(isInviteValid(getInviteStore().get(invite.token)), false);
+});
+
+// Keep last: resetting replaces the shared store other tests write to.
+test("resetInviteStore makes a used seeded invite valid again", async () => {
+  const { resetInviteStore } = await import("./invite-store.ts");
+  getInviteStore().markUsed("welcome-alice");
+  resetInviteStore();
+  assert.equal(isInviteValid(getInviteStore().get("welcome-alice")), true);
 });

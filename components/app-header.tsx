@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/client.ts";
-import { useAuth } from "@/lib/firebase/auth-context.tsx";
 import { clearSession } from "@/lib/firebase/session-actions.ts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/ui/logo";
 import { ROLE_LANDING } from "@/lib/role-landing.ts";
 import type { UserRole } from "@/lib/types.ts";
 
@@ -20,53 +20,63 @@ const WORKSPACE_LABEL: Record<UserRole, string> = {
   rcic: "RCIC Workspace",
 };
 
-export function AppHeader() {
+const NOTIFICATIONS_HREF: Record<UserRole, string> = {
+  client: "/updates",
+  admin: "/admin/notifications",
+  rcic: "/rcic/notifications",
+};
+
+// Auth screens (A01/A02) and the demo inbox are full-bleed, no global header.
+const FULL_BLEED_PATHS = ["/login", "/signup", "/invite", "/demo"];
+
+export interface HeaderUser {
+  role: UserRole;
+  name: string;
+}
+
+export function AppHeader({ user }: { user: HeaderUser | null }) {
   const router = useRouter();
-  const { user, role, loading } = useAuth();
+  const pathname = usePathname();
+  // Clients and Admin navigate with the sidebar (no top bar in Figma).
+  if (user?.role === "client" || user?.role === "admin") return null;
+  if (FULL_BLEED_PATHS.some((path) => pathname.startsWith(path))) return null;
 
   async function handleLogOut() {
     await signOut(auth);
     await clearSession();
     router.push("/login");
+    router.refresh();
   }
-
-  const brandHref = role ? ROLE_LANDING[role] : "/login";
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Account";
 
   return (
     <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3 print:hidden">
       <div className="flex items-center gap-3">
-        <Link href={brandHref} className="text-lg font-semibold tracking-tight text-primary">
-          FlowOui
+        <Link href={user ? ROLE_LANDING[user.role] : "/login"}>
+          <Logo variant="full" className="h-7" />
         </Link>
-        {role ? (
+        {user ? (
           <Badge variant="outline" className="uppercase tracking-wide">
-            {WORKSPACE_LABEL[role]}
+            {WORKSPACE_LABEL[user.role]}
           </Badge>
         ) : null}
       </div>
 
-      {loading ? (
-        <span className="text-xs text-muted-foreground">Loading...</span>
-      ) : !user ? (
+      {user ? (
         <div className="flex items-center gap-3 text-sm">
-          <Link href="/login" className="hover:underline">
-            Log in
+          <Link href={NOTIFICATIONS_HREF[user.role]} className="text-muted-foreground hover:underline">
+            Notifications
           </Link>
-          <Link href="/signup" className="hover:underline">
-            Sign up
-          </Link>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-muted-foreground">Notifications</span>
           <Badge variant="secondary" className="h-auto px-3 py-1 text-sm">
-            {displayName}
+            {user.name}
           </Badge>
           <Button type="button" variant="outline" size="sm" onClick={handleLogOut}>
             Log out
           </Button>
         </div>
+      ) : (
+        <Link href="/login" className="text-sm hover:underline">
+          Sign in
+        </Link>
       )}
     </header>
   );

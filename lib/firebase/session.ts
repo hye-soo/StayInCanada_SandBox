@@ -2,8 +2,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminAuth, adminDb } from "./admin.ts";
-import { SESSION_COOKIE_NAME } from "./session-constants.ts";
+import { MOCK_SESSION_COOKIE_NAME, SESSION_COOKIE_NAME } from "./session-constants.ts";
 import { ROLE_LANDING } from "@/lib/role-landing.ts";
+import { getMockAuthStore } from "@/lib/mock-auth-store.ts";
 import type { UserRole } from "@/lib/types.ts";
 
 export interface SessionUser {
@@ -20,6 +21,13 @@ export interface SessionUser {
 // claims — no extra Admin SDK call needed.
 export async function getSessionUser(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
+
+  const mockUserId = cookieStore.get(MOCK_SESSION_COOKIE_NAME)?.value;
+  const mockUser = mockUserId ? getMockAuthStore().findById(mockUserId) : undefined;
+  if (mockUser) {
+    return { uid: mockUser.id, role: mockUser.role, email: mockUser.email, displayName: mockUser.name };
+  }
+
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionCookie) return null;
 

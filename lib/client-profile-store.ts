@@ -3,6 +3,10 @@ export interface ClientProfile {
   // every client gets the same default. Display-only, not used for
   // access control (any admin/rcic can still see any client).
   assignedAdvisorName: string;
+  assignedRcicName: string;
+  // Mock placeholders until applications have real records.
+  applicationId: string;
+  dueDate: string;
 }
 
 export interface ClientProfileStore {
@@ -10,7 +14,12 @@ export interface ClientProfileStore {
 }
 
 function defaultProfile(): ClientProfile {
-  return { assignedAdvisorName: "Alex Morgan" };
+  return {
+    assignedAdvisorName: "Alex Morgan",
+    assignedRcicName: "Jean Martin",
+    applicationId: "FO-2026-014",
+    dueDate: "06/14/2027",
+  };
 }
 
 class InMemoryClientProfileStore implements ClientProfileStore {

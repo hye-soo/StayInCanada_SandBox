@@ -6,6 +6,8 @@ test("a never-before-seen client gets a default profile", () => {
   const store = getClientProfileStore();
   const profile = store.getProfile("uid-profile-1");
   assert.ok(profile.assignedAdvisorName);
+  assert.ok(profile.applicationId);
+  assert.ok(profile.dueDate);
 });
 
 test("the same client's profile persists across repeated access", () => {

@@ -5,13 +5,13 @@ import {
   getAllClientSummaries,
   getAdminOverviewStats,
   getRcicOverviewStats,
-  getNeedsAttentionRows,
+  getClientQueueRows,
   needsRcicValidation,
   needsPackageApproval,
   needsSubmissionRecording,
 } from "./client-directory.ts";
 import { getChecklistStore } from "./checklist-store.ts";
-import { updateClientQuestionnaireSection } from "./client-questionnaire.ts";
+import { saveClientIntakeStep } from "./client-questionnaire.ts";
 import { applySubmissionAction } from "./apply-submission-action.ts";
 
 test("a fresh client summary: all checklist items required, no questionnaire sections complete", () => {
@@ -42,7 +42,7 @@ test("checklistCounts reflects updated item statuses", () => {
 
 test("questionnaireComplete reflects a completed section", () => {
   const clientId = "uid-directory-questionnaire";
-  updateClientQuestionnaireSection(clientId, "languageTest", { hasTakenTest: "no" });
+  saveClientIntakeStep(clientId, "travel", { values: { hasTravelled: "no" } });
 
   const summary = getClientSummary(clientId);
   assert.equal(summary.questionnaireComplete, 1);
@@ -113,16 +113,71 @@ test("needsRcicValidation / needsPackageApproval / needsSubmissionRecording refl
   assert.equal(needsSubmissionRecording(getClientSummary(clientId)), true);
 });
 
-test("getNeedsAttentionRows includes a new client's non-approved items with the right owner", () => {
-  const clientId = "uid-attention-1";
+test("getClientQueueRows has exactly one row per client, not one per item", () => {
+  const clientId = "uid-queue-one-row";
   const store = getChecklistStore();
   const items = store.getChecklist(clientId);
   store.updateItem(clientId, { ...items[0]!, status: "submitted" });
+  store.updateItem(clientId, { ...items[1]!, status: "required" });
 
-  const rows = getNeedsAttentionRows().filter((row) => row.clientId === clientId);
-  assert.ok(rows.length > 0);
-  const submittedRow = rows.find((row) => row.itemLabel === items[0]!.label);
-  assert.equal(submittedRow?.owner, "Admin");
-  // approved items never appear
-  assert.ok(rows.every((row) => row.statusLabel !== "Approved"));
+  const rows = getClientQueueRows().filter((row) => row.clientId === clientId);
+  assert.equal(rows.length, 1);
+});
+
+test("getClientQueueRows surfaces the most advanced pending action across every pipeline stage", () => {
+  const store = getChecklistStore();
+
+  const waitingOnClient = "uid-queue-waiting";
+  store.updateItem(waitingOnClient, { ...store.getChecklist(waitingOnClient)[0]!, status: "changes_required" });
+  const waitingRow = getClientQueueRows().find((r) => r.clientId === waitingOnClient);
+  assert.equal(waitingRow?.owner, "Client");
+
+  const adminCheck = "uid-queue-admin-check";
+  store.updateItem(adminCheck, { ...store.getChecklist(adminCheck)[0]!, status: "submitted" });
+  const adminRow = getClientQueueRows().find((r) => r.clientId === adminCheck);
+  assert.equal(adminRow?.owner, "Admin");
+  assert.match(adminRow!.nextAction, /quality check/i);
+
+  const rcicReview = "uid-queue-rcic-review";
+  store.updateItem(rcicReview, { ...store.getChecklist(rcicReview)[0]!, status: "under_review" });
+  const rcicRow = getClientQueueRows().find((r) => r.clientId === rcicReview);
+  assert.equal(rcicRow?.owner, "RCIC");
+  assert.match(rcicRow!.nextAction, /review/i);
+
+  const readyToValidate = "uid-queue-validate";
+  for (const item of store.getChecklist(readyToValidate)) {
+    store.updateItem(readyToValidate, { ...item, status: "approved" });
+  }
+  const validateRow = getClientQueueRows().find((r) => r.clientId === readyToValidate);
+  assert.equal(validateRow?.owner, "RCIC");
+  assert.match(validateRow!.nextAction, /validate/i);
+
+  applySubmissionAction(readyToValidate, { type: "validate" }, "Jean Martin");
+  const prepareRow = getClientQueueRows().find((r) => r.clientId === readyToValidate);
+  assert.equal(prepareRow?.owner, "Admin");
+  assert.match(prepareRow!.nextAction, /prepare package/i);
+
+  applySubmissionAction(readyToValidate, { type: "prepare_package", preparedBy: "Alex Morgan" }, "Alex Morgan");
+  const approveRow = getClientQueueRows().find((r) => r.clientId === readyToValidate);
+  assert.equal(approveRow?.owner, "RCIC");
+  assert.match(approveRow!.nextAction, /approve package/i);
+
+  applySubmissionAction(readyToValidate, { type: "approve_package" }, "Jean Martin");
+  const recordRow = getClientQueueRows().find((r) => r.clientId === readyToValidate);
+  assert.equal(recordRow?.owner, "RCIC");
+  assert.match(recordRow!.nextAction, /record submission/i);
+
+  applySubmissionAction(
+    readyToValidate,
+    {
+      type: "record_submission",
+      submittedBy: "Jean Martin",
+      submissionDate: "2026-10-26",
+      channel: "IRCC Portal",
+      irccReference: "REF-1",
+    },
+    "Jean Martin"
+  );
+  const doneRow = getClientQueueRows().find((r) => r.clientId === readyToValidate);
+  assert.equal(doneRow?.owner, "Done");
 });

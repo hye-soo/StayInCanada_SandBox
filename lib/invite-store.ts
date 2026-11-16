@@ -1,14 +1,17 @@
 import { randomUUID } from "node:crypto";
+import { MOCK_INVITES } from "./data/mock-users.ts";
 
 export interface ClientInvite {
   token: string;
   email: string;
+  // The client's name from the consultation; greets them on A01.
+  name?: string;
   createdAt: number;
   usedAt?: number;
 }
 
 export interface InviteStore {
-  create(email: string): ClientInvite;
+  create(email: string, name?: string): ClientInvite;
   get(token: string): ClientInvite | undefined;
   markUsed(token: string): void;
 }
@@ -23,8 +26,14 @@ export function isInviteValid(invite: ClientInvite | undefined): invite is Clien
 class InMemoryInviteStore implements InviteStore {
   private readonly invitesByToken = new Map<string, ClientInvite>();
 
-  create(email: string): ClientInvite {
-    const invite: ClientInvite = { token: randomUUID(), email, createdAt: Date.now() };
+  constructor(seed: { token: string; email: string; name?: string }[]) {
+    for (const invite of seed) {
+      this.invitesByToken.set(invite.token, { ...invite, createdAt: Date.now() });
+    }
+  }
+
+  create(email: string, name?: string): ClientInvite {
+    const invite: ClientInvite = { token: randomUUID(), email, name, createdAt: Date.now() };
     this.invitesByToken.set(invite.token, invite);
     return invite;
   }
@@ -42,6 +51,11 @@ class InMemoryInviteStore implements InviteStore {
 let store: InviteStore | undefined;
 
 export function getInviteStore(): InviteStore {
-  if (!store) store = new InMemoryInviteStore();
+  if (!store) store = new InMemoryInviteStore(MOCK_INVITES);
   return store;
+}
+
+// Demo only: back to just the seeded invites, all unused.
+export function resetInviteStore(): void {
+  store = undefined;
 }

@@ -15,7 +15,8 @@ export type ChecklistAction =
   | { type: "upload"; file: { name: string; size: number } }
   | { type: "mark_reviewed"; note?: string }
   | { type: "approve" }
-  | { type: "request_changes"; comment: string };
+  | { type: "request_changes"; comment: string }
+  | { type: "flag_for_admin"; note: string };
 
 export type TransitionResult =
   | { item: ChecklistItem; error?: undefined }
@@ -34,6 +35,10 @@ export function transitionChecklistItem(
           error: `"${action.file.name}" is larger than 4 MB. Choose a smaller file.`,
         };
       }
+      const previousUpload =
+        item.status === "changes_required" && item.fileName
+          ? { fileName: item.fileName, fileSize: item.fileSize!, comment: item.staffComment }
+          : item.previousUpload;
       return {
         item: {
           ...item,
@@ -42,21 +47,34 @@ export function transitionChecklistItem(
           fileSize: action.file.size,
           aiReport: MOCK_AI_REPORT,
           aiFormSuggestion: MOCK_AI_FORM_SUGGESTION,
-          rcicComment: undefined,
+          staffComment: undefined,
+          rcicFlagNote: undefined,
+          previousUpload,
         },
       };
     }
-    // Admin's only action: forward a submitted item to RCIC, with an
-    // optional internal note (visible to RCIC only). Admin never sets
-    // client-facing status/comments directly (per
-    // docs/CURRENT_USER_FLOW_V2.md — RCIC is the sole client interface).
+    // Admin forwards a submitted item to RCIC, with an optional
+    // internal note (visible to RCIC only).
     case "mark_reviewed":
       return { item: { ...item, status: "under_review", adminNote: action.note } };
     case "approve":
       return { item: { ...item, status: "approved" } };
+    // Admin is the sole client-facing gate (docs/DECISIONS.md
+    // 2026-10-26): sets the client-visible comment, whether from
+    // Admin's own quality check or from an RCIC flag.
     case "request_changes":
       return {
-        item: { ...item, status: "changes_required", rcicComment: action.comment },
+        item: {
+          ...item,
+          status: "changes_required",
+          staffComment: action.comment,
+          rcicFlagNote: undefined,
+        },
       };
+    // RCIC never contacts the client directly — flagging bounces the
+    // item back to Admin (status returns to "submitted", reusing its
+    // existing "Admin's turn" meaning) with an internal note.
+    case "flag_for_admin":
+      return { item: { ...item, status: "submitted", rcicFlagNote: action.note } };
   }
 }

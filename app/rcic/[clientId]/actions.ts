@@ -5,17 +5,19 @@ import { revalidatePath } from "next/cache";
 import { applyChecklistAction } from "@/lib/apply-checklist-action.ts";
 import { requireRole } from "@/lib/firebase/session.ts";
 
-// RCIC is the sole interface to the client for both outcomes —
-// see docs/CURRENT_USER_FLOW_V2.md.
+// RCIC never contacts the client directly — Admin is the sole
+// client-facing gate (docs/DECISIONS.md 2026-10-26).
 function refreshViews(clientId: string, itemId: string) {
   revalidatePath(`/rcic/${clientId}`);
+  revalidatePath(`/admin/${clientId}`);
   revalidatePath("/checklist");
   revalidatePath(`/checklist/${itemId}`);
 }
 
 export async function approveItem(clientId: string, itemId: string) {
-  await requireRole(["rcic"]);
-  const result = applyChecklistAction(clientId, itemId, { type: "approve" });
+  const session = await requireRole(["rcic"]);
+  const actorName = session.displayName || session.email || "RCIC";
+  const result = applyChecklistAction(clientId, itemId, { type: "approve" }, actorName);
 
   if (result.error) {
     redirect(`/rcic/${clientId}?error=${encodeURIComponent(result.error)}`);
@@ -25,17 +27,18 @@ export async function approveItem(clientId: string, itemId: string) {
   redirect(`/rcic/${clientId}`);
 }
 
-export async function requestChanges(clientId: string, itemId: string, formData: FormData) {
-  await requireRole(["rcic"]);
-  const comment = String(formData.get("comment") ?? "").trim();
+// RCIC flags an issue to Admin internally — Admin is the one who
+// actually notifies the client.
+export async function flagForAdmin(clientId: string, itemId: string, formData: FormData) {
+  const session = await requireRole(["rcic"]);
+  const actorName = session.displayName || session.email || "RCIC";
+  const note = String(formData.get("note") ?? "").trim();
 
-  if (!comment) {
-    redirect(
-      `/rcic/${clientId}?error=${encodeURIComponent("Add a comment before requesting changes.")}`
-    );
+  if (!note) {
+    redirect(`/rcic/${clientId}?error=${encodeURIComponent("Add a note for Admin before flagging.")}`);
   }
 
-  const result = applyChecklistAction(clientId, itemId, { type: "request_changes", comment });
+  const result = applyChecklistAction(clientId, itemId, { type: "flag_for_admin", note }, actorName);
 
   if (result.error) {
     redirect(`/rcic/${clientId}?error=${encodeURIComponent(result.error)}`);

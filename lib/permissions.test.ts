@@ -11,13 +11,15 @@ const MATRIX: Record<UserRole, Record<string, boolean>> = {
     viewOwnChecklist: true,
     viewAllChecklists: false,
     requestChanges: false,
+    flagForAdmin: false,
     approve: false,
   },
   rcic: {
     uploadOwnDocument: false,
     viewOwnChecklist: false,
     viewAllChecklists: true,
-    requestChanges: true,
+    requestChanges: false,
+    flagForAdmin: true,
     approve: true,
   },
   admin: {
@@ -25,6 +27,7 @@ const MATRIX: Record<UserRole, Record<string, boolean>> = {
     viewOwnChecklist: false,
     viewAllChecklists: true,
     requestChanges: true,
+    flagForAdmin: false,
     approve: false,
   },
 };
@@ -41,4 +44,9 @@ test("admin specifically cannot approve, even though it can view and request cha
   assert.equal(can("admin", "viewAllChecklists"), true);
   assert.equal(can("admin", "requestChanges"), true);
   assert.equal(can("admin", "approve"), false);
+});
+
+test("rcic flags issues to Admin internally rather than requesting changes directly", () => {
+  assert.equal(can("rcic", "flagForAdmin"), true);
+  assert.equal(can("rcic", "requestChanges"), false);
 });

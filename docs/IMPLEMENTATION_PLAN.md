@@ -396,6 +396,105 @@ replace per-document review. See docs/DECISIONS.md 2026-10-26.
       current mock placeholder) — not built; no real file storage or
       form generation exists yet (see Stretch goals)
 
+## Phase 7 — Client dashboard refined to the 9-screen wireframe set (C01-C09) — Must-ship (for full-flow demo)
+
+C01 (Overview) done first per explicit request ("refine client
+dashboard first"); user then said "implement it accordingly" for the
+rest. C02 and C08 were judged as already covered / redundant with
+what C01 already shows (see below) and were not built as separate
+screens. See docs/DECISIONS.md 2026-10-26 for every lazy
+simplification made along the way.
+
+- [x] C01 Overview: generalized "next action" callout (was
+      intake-only; now also surfaces the next required/flagged
+      document) — lib/dashboard-journey.ts, TDD
+- [x] C01 Overview: Document checklist card gets a progress bar + %,
+      matching the intake card
+- [x] C01 Overview: "Your application journey" 5-step stepper
+      (Onboarding/Intake/Documents/Validation/Application prep),
+      replacing the single "Application stage" badge card — derived
+      from existing checklist/submission state, no new data
+- [x] C01 Overview: "Latest update" reframed as "Latest team memo" —
+      same underlying per-item rcicComment data, no new messaging
+      system built
+- [x] C02 Sectioned intake — confirmed already matches; not touched
+- [x] C03 Review and submit intake: new `/questionnaire/review` page
+      (QuestionnaireSummary + a confirmation checkbox + "Submit
+      intake"), backed by a real `submittedAt` timestamp
+      (lib/questionnaire-store.ts, TDD) surfaced read-only on both
+      Admin's and RCIC's per-client pages
+- [x] C04 Document checklist: tabs (All/Your action/Awaiting
+      review/Completed), a "Next action by" column, and a top
+      next-action callout — lib/checklist-next-action.ts (TDD),
+      shared with the dashboard's own callout
+- [x] C05/C06 Requirement upload + validation-error states:
+      drop-zone-style upload box, a "why it's needed" sidebar panel,
+      and a styled red error banner on a rejected upload
+- [x] C07 Feedback and resubmission: a single-prior-version history
+      panel (lib/checklist-transitions.ts `previousUpload`, TDD) —
+      not a full version array; "reply to the memo" was not built as
+      a separate thread, since resubmitting IS the reply (it already
+      clears the staff comment)
+- [ ] C08 Requirements completed as its own dedicated screen — not
+      built; judged redundant with C01's journey stepper and the
+      existing /checklist page, both of which already surface
+      "everything approved, awaiting next stage" without a new page
+- [x] C09 Notifications and messages: new `/updates` page built
+      entirely from existing checklist data (lib/client-updates.ts,
+      TDD); header's "Notifications" now links there for the client
+      role. A real, clickable notification store with deep links was
+      added next — see Phase 8 below
+
+## Phase 8 — Admin is the sole client-facing gate; real mocked-email notifications — Must-ship (for full-flow demo)
+
+Reverses the 2026-10-08 decision ("RCIC is the sole gate to the
+client"). New rule: Admin does all client-facing operational work —
+flags documents AND intake sections straight to the client. RCIC
+never contacts the client directly; RCIC routes issues through Admin
+instead. See docs/DECISIONS.md 2026-10-26 for the full reasoning and
+every lazy call made while building this.
+
+- [x] lib/checklist-transitions.ts: `rcicComment` renamed
+      `staffComment` (now set by Admin's `request_changes`, not
+      RCIC's); new `rcicFlagNote` field (RCIC -> Admin, internal);
+      new `flag_for_admin` action (RCIC: under_review -> submitted,
+      reusing "submitted = Admin's turn" rather than a new status);
+      `request_changes` moved to Admin's action set, TDD
+- [x] lib/permissions.ts: matrix updated — `requestChanges` is
+      Admin-only now; new `flagForAdmin` permission for RCIC only, TDD
+- [x] lib/notification-store.ts: real, clickable notifications with a
+      deep-link `href` and `readAt`, keyed by the client's own uid or
+      by a shared "admin"/"rcic" inbox (no per-staff-member assignment
+      model exists), TDD
+- [x] lib/apply-checklist-action.ts: now takes an `actorName` and
+      fires a mocked email (logged to the client's existing
+      lib/activity-log-store.ts) + a real notification for whichever
+      role should act next, on every action type, TDD
+- [x] lib/questionnaire-flag-store.ts + lib/apply-questionnaire-flag.ts:
+      new capability — Admin can flag a specific intake section
+      straight to the client (didn't exist in any form before), same
+      mocked-email + notification pattern, auto-clears when the client
+      re-saves that section, TDD
+- [x] app/admin/[clientId]: new "Request changes" form per submitted
+      document (shows RCIC's flag note pre-filled when present) and a
+      "Flag this section" control per intake section
+- [x] app/rcic/[clientId]: RCIC's old "Request changes" replaced with
+      "Flag for Admin" (internal note, not client-visible)
+- [x] app/admin/notifications, app/rcic/notifications: new pages
+      listing each role's shared inbox; client's existing /updates
+      page now also shows real notifications, not just derived
+      checklist rows
+- [x] Header + both staff sidebars: "Notifications" is a real link for
+      all three roles now (was client-only)
+- [ ] Real email delivery — explicitly deferred (mocked for now per
+      request); needs an email provider + API key from the business
+      before this can be wired up for real
+- [ ] A live unread-count badge in the header — skipped; would need
+      either an API route or restructuring how session data reaches
+      the header (a client component today, with no server session
+      fetch at that layout level). The dedicated notification pages
+      already show read/unread visually
+
 ## Stretch goals (beyond Phase 2)
 
 - Fine-grained role-based permissions (beyond the basic separate

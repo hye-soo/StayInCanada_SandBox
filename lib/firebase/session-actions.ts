@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { adminAuth } from "./admin.ts";
-import { SESSION_COOKIE_NAME } from "./session-constants.ts";
+import { MOCK_SESSION_COOKIE_NAME, SESSION_COOKIE_NAME } from "./session-constants.ts";
 
 const SESSION_EXPIRES_IN_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
 
@@ -26,4 +26,5 @@ export async function createSession(idToken: string) {
 export async function clearSession() {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.delete(MOCK_SESSION_COOKIE_NAME);
 }

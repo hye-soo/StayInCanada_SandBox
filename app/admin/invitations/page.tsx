@@ -30,6 +30,15 @@ export default async function AdminInvitationsPage({
         className="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-border p-6"
       >
         <label className="flex flex-col gap-1 text-sm">
+          Client name
+          <input
+            type="text"
+            name="name"
+            placeholder="Alice Chang"
+            className="rounded-lg border border-input bg-transparent px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
           Client email
           <input
             type="email"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/firebase/session.ts";
-import { getRcicOverviewStats, getNeedsAttentionRows } from "@/lib/client-directory.ts";
+import { getRcicOverviewStats, getClientQueueRows } from "@/lib/client-directory.ts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -9,8 +9,9 @@ export default async function RcicOverviewPage() {
   const stats = getRcicOverviewStats();
   // RCIC's slice of the same cross-client queue: only rows that are
   // actually RCIC's turn (Admin already forwarded, or a correction
-  // RCIC itself requested).
-  const rows = getNeedsAttentionRows().filter(
+  // RCIC itself requested) — clients still being worked by Admin, or
+  // already submitted, don't need RCIC's attention right now.
+  const rows = getClientQueueRows().filter(
     (row) => row.owner === "RCIC" || row.owner === "Client"
   );
 
@@ -73,7 +74,8 @@ export default async function RcicOverviewPage() {
           <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
             <tr>
               <th className="p-3 font-medium">Client</th>
-              <th className="p-3 font-medium">Needs attention</th>
+              <th className="p-3 font-medium">Stage</th>
+              <th className="p-3 font-medium">Next action</th>
               <th className="p-3 font-medium">Owner</th>
               <th className="p-3 font-medium">Open</th>
             </tr>
@@ -81,17 +83,16 @@ export default async function RcicOverviewPage() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td className="p-3 text-muted-foreground" colSpan={4}>
+                <td className="p-3 text-muted-foreground" colSpan={5}>
                   Nothing needs attention right now.
                 </td>
               </tr>
             ) : (
-              rows.map((row, index) => (
-                <tr key={`${row.clientId}-${index}`} className="border-t border-border">
+              rows.map((row) => (
+                <tr key={row.clientId} className="border-t border-border">
                   <td className="p-3">Client {row.clientId}</td>
-                  <td className="p-3">
-                    {row.itemLabel} · {row.statusLabel}
-                  </td>
+                  <td className="p-3">{row.stageLabel}</td>
+                  <td className="p-3">{row.nextAction}</td>
                   <td className="p-3">{row.owner}</td>
                   <td className="p-3">
                     <Link href={`/rcic/${row.clientId}`} className="hover:underline">
@@ -109,8 +110,8 @@ export default async function RcicOverviewPage() {
         <h2 className="text-lg font-semibold">Your next handoff</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Review each document and the client&apos;s intake information. Approve what&apos;s
-          ready, or request changes for anything missing. Once everything&apos;s approved, send
-          the finished package to IRCC.
+          ready, or flag anything wrong for Admin to take back to the client. Once
+          everything&apos;s approved, send the finished package to IRCC.
         </p>
       </div>
     </main>

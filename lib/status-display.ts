@@ -50,3 +50,13 @@ export const STATUS_BADGE_CLASS: Record<ChecklistItemStatus, string> = {
     "bg-status-changes-required text-status-changes-required-foreground",
   approved: "bg-status-approved text-status-approved-foreground",
 };
+
+// Client-facing wording from Figma C04 / Upload flow (staff screens keep
+// STATUS_LABEL). "Next action by" names who acts next.
+export const CLIENT_STATUS: Record<ChecklistItemStatus, { label: string; nextBy: string }> = {
+  required: { label: "Required", nextBy: "You" },
+  changes_required: { label: "Needs changes", nextBy: "You" },
+  submitted: { label: "Submitted", nextBy: "Admin" },
+  under_review: { label: "In review", nextBy: "Case team" },
+  approved: { label: "Completed", nextBy: "N/A" },
+};
