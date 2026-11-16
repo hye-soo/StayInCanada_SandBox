@@ -20,7 +20,7 @@ export interface SidebarNavItem {
 }
 
 const ITEM_CLASS =
-  "flex h-12 items-center gap-2 rounded-full pr-3 pl-[22px] text-sm font-semibold whitespace-nowrap transition-colors";
+  "flex h-12 items-center gap-2 rounded-full pr-3 pl-[14px] text-sm font-semibold whitespace-nowrap transition-colors";
 
 // Navy rounded sidebar from Figma "Navigation / Client". Items come in
 // as props so staff workspaces can reuse it with their own links.
@@ -52,7 +52,7 @@ export function SidebarNav({ items }: { items: SidebarNavItem[] }) {
   }
 
   return (
-    <aside className="flex shrink-0 flex-col gap-6 rounded-[30px] bg-navy px-[18px] py-8 text-white print:hidden lg:sticky lg:top-8 lg:h-[calc(100dvh-4rem)] lg:w-60">
+    <aside className="flex shrink-0 flex-col gap-6 rounded-[30px] bg-navy px-[14px] py-8 text-white print:hidden lg:sticky lg:top-8 lg:h-[calc(100dvh-4rem)] lg:w-[220px]">
       <Logo variant="full-on-dark" className="h-7 self-start" />
 
       <nav className="flex flex-wrap gap-3 lg:flex-col">

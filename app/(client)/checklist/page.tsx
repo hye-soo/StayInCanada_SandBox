@@ -92,9 +92,7 @@ export default async function ChecklistPage({ searchParams }: PageProps<"/checkl
 
         <section className="relative flex flex-col gap-1 rounded-xl border border-border bg-card px-5 py-7">
           {attention > 0 ? (
-            <span className="absolute -top-1.5 -right-1 flex h-6 min-w-7 items-center justify-center rounded-full bg-coral px-2 text-xs text-white">
-              {attention}
-            </span>
+            <span aria-hidden className="absolute top-6 right-6 size-2 rounded-full bg-coral" />
           ) : null}
           <h2 className="text-xl font-semibold text-foreground">
             {attention > 0
