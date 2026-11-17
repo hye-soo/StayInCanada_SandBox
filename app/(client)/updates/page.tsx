@@ -7,7 +7,7 @@ import { getClientProfileStore } from "@/lib/client-profile-store.ts";
 import { formatFeedTime } from "@/lib/format-time.ts";
 import { getMemoStore, type Memo } from "@/lib/memo-store.ts";
 import { getNotificationStore, type Notification } from "@/lib/notification-store.ts";
-import { MemoBubble } from "@/components/patterns/memo-bubble";
+import { FEED_OUTLINE, FEED_PRIMARY, FeedTag, MemoThreadCard } from "@/components/patterns/memo-thread-card";
 import { DeleteMemoButton, MemoComposeDialog, MemoReplyDialog, type RelatedOption } from "@/components/patterns/memo-dialogs";
 import { Icon } from "@/components/ui/icon";
 import { deleteMemo, editMemo, markMemoRead, markUpdateRead, replyToMemo, sendMemo } from "./actions.ts";
@@ -19,23 +19,8 @@ const FILTERS = [
 ] as const;
 type FilterId = (typeof FILTERS)[number]["id"];
 
-const OUTLINE = "flex h-10 items-center justify-center rounded-full border border-primary px-6 text-sm font-semibold text-primary hover:bg-secondary";
-const PRIMARY = "flex h-10 items-center justify-center gap-1.5 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground hover:bg-primary/90";
 
 type FeedItem = { kind: "memo"; at: number; memo: Memo } | { kind: "update"; at: number; update: Notification };
-
-function Tag({ children, filled }: { children: React.ReactNode; filled?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "rounded-full px-2.5 py-0.5 text-xs",
-        filled ? "bg-secondary text-primary" : "border border-primary text-primary"
-      )}
-    >
-      {children}
-    </span>
-  );
-}
 
 // Figma "Memo & Updates / Client / All activity": memo threads with the
 // case team and case updates, newest first, filterable.
@@ -45,7 +30,7 @@ export default async function UpdatesPage({ searchParams }: PageProps<"/updates"
   const filter = (FILTERS.some((item) => item.id === rawFilter) ? rawFilter : "all") as FilterId;
 
   const { items, visaType } = getClientChecklist(uid);
-  const { applicationId, assignedAdvisorName } = getClientProfileStore().getProfile(uid);
+  const { applicationId } = getClientProfileStore().getProfile(uid);
   const memos = getMemoStore().list(uid);
   // Updates are the client's notifications that carry a short explanation
   // (approvals, account ready); change requests show up as memos instead.
@@ -87,7 +72,7 @@ export default async function UpdatesPage({ searchParams }: PageProps<"/updates"
           options={relatedOptions}
           action={sendMemo}
           triggerLabel="+ New memo"
-          triggerClassName={cn(PRIMARY, "mt-7 w-[220px]")}
+          triggerClassName={cn(FEED_PRIMARY, "mt-7 w-[220px]")}
         />
       </header>
 
@@ -131,8 +116,8 @@ export default async function UpdatesPage({ searchParams }: PageProps<"/updates"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex gap-2">
-                  <Tag filled>Update</Tag>
-                  {item.update.readAt ? null : <Tag filled>Unread</Tag>}
+                  <FeedTag filled>Update</FeedTag>
+                  {item.update.readAt ? null : <FeedTag filled>Unread</FeedTag>}
                 </div>
                 <time className="text-[13px] text-foreground">{formatFeedTime(item.update.createdAt)}</time>
               </div>
@@ -155,12 +140,12 @@ export default async function UpdatesPage({ searchParams }: PageProps<"/updates"
                   }}
                   action={sendMemo}
                   triggerLabel="Ask a question"
-                  triggerClassName={OUTLINE}
+                  triggerClassName={FEED_OUTLINE}
                 />
                 {item.update.readAt ? null : (
                   <form action={markUpdateRead}>
                     <input type="hidden" name="notificationId" value={item.update.id} />
-                    <button type="submit" className={OUTLINE}>
+                    <button type="submit" className={FEED_OUTLINE}>
                       Mark as read
                     </button>
                   </form>
@@ -168,12 +153,7 @@ export default async function UpdatesPage({ searchParams }: PageProps<"/updates"
               </div>
             </li>
           ) : (
-            <MemoCard
-              key={`memo-${item.memo.id}`}
-              memo={item.memo}
-              clientName={displayName ?? firstName}
-              advisorName={assignedAdvisorName}
-            />
+            <MemoCard key={`memo-${item.memo.id}`} memo={item.memo} clientName={displayName ?? firstName} />
           )
         )}
       </ul>
@@ -181,85 +161,59 @@ export default async function UpdatesPage({ searchParams }: PageProps<"/updates"
   );
 }
 
-function MemoCard({ memo, clientName, advisorName }: { memo: Memo; clientName: string; advisorName: string }) {
-  const actionNeeded = memo.waitingOn === "client";
+function MemoCard({ memo, clientName }: { memo: Memo; clientName: string }) {
   const editable = memo.startedBy === "client" && memo.messages.length === 1;
   const lastStaff = [...memo.messages].reverse().find((message) => message.from === "staff");
 
   return (
-    <li className={cn("flex flex-col gap-3 rounded-xl border border-primary/40 px-6 py-5", memo.unreadForClient ? "bg-secondary" : "bg-card")}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex gap-2">
-          <Tag>Memo</Tag>
-          {memo.unreadForClient ? <Tag>Unread</Tag> : null}
-          {actionNeeded ? <Tag>Action needed</Tag> : null}
-        </div>
-        <time className="text-[13px] text-foreground">{formatFeedTime(memo.updatedAt)}</time>
-      </div>
-      <h2 className="text-xl font-semibold text-foreground">
-        {memo.subject} :{" "}
-        <span className="text-primary">{actionNeeded ? "Waiting for you" : "Waiting for case team"}</span>
-      </h2>
-      <p className="-mt-2 text-xs text-muted-foreground">{memo.related.label}</p>
-
-      <div className="flex flex-col gap-3">
-        {memo.messages.map((message, index) => {
-          const mine = message.from === "client";
-          return (
-            <div key={index} className={cn("flex flex-col", mine ? "items-end" : "items-start")}>
-              <MemoBubble
-                compact
-                side={mine ? "right" : "left"}
-                avatarSrc={mine ? "/overview/client-avatar.png" : "/overview/advisor-avatar.png"}
-                authorName={mine ? clientName : message.authorName}
-                authorCaption={mine ? "You" : message.authorName}
-                authorRole={mine ? clientName : message.authorName === advisorName ? "Case coordinator" : "Case team"}
-                message={message.body}
-              />
-              {mine && editable ? (
-                <div className="mr-16 flex gap-1">
-                  <MemoComposeDialog
-                    mode="edit"
-                    options={[]}
-                    defaults={{ memoId: memo.id, subject: memo.subject, message: message.body }}
-                    action={editMemo}
-                    triggerLabel="Edit memo"
-                    triggerClassName="flex size-7 items-center justify-center rounded-full text-muted-foreground hover:bg-card hover:text-foreground"
-                  />
-                  <DeleteMemoButton memoId={memo.id} action={deleteMemo} />
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
-
-      {lastStaff ? (
-        <div className="flex flex-wrap justify-end gap-3">
-          {memo.related.href && memo.actionLabel ? (
-            <Link href={memo.related.href} className={cn(PRIMARY, "w-[220px]")}>
-              {memo.actionLabel}
-              <Icon src="/icons/arrow-up-right.svg" className="size-3" />
-            </Link>
-          ) : null}
-          <MemoReplyDialog
-            memoId={memo.id}
-            subject={memo.subject}
-            quote={lastStaff.body}
-            relatedLabel={memo.related.label}
-            action={replyToMemo}
-            triggerClassName={cn(OUTLINE, "w-[150px]")}
-          />
-          {memo.unreadForClient ? (
-            <form action={markMemoRead}>
-              <input type="hidden" name="memoId" value={memo.id} />
-              <button type="submit" className={cn(OUTLINE, "w-[150px]")}>
-                Mark as read
-              </button>
-            </form>
-          ) : null}
-        </div>
-      ) : null}
-    </li>
+    <MemoThreadCard
+      memo={memo}
+      viewer="client"
+      clientName={clientName}
+      clientAvatarSrc="/overview/client-avatar.png"
+      ownMessageExtra={
+        editable ? (
+          <>
+            <MemoComposeDialog
+              mode="edit"
+              options={[]}
+              defaults={{ memoId: memo.id, subject: memo.subject, message: memo.messages[0]!.body }}
+              action={editMemo}
+              triggerLabel="Edit memo"
+              triggerClassName="flex size-7 items-center justify-center rounded-full text-muted-foreground hover:bg-card hover:text-foreground"
+            />
+            <DeleteMemoButton memoId={memo.id} action={deleteMemo} />
+          </>
+        ) : undefined
+      }
+      actions={
+        lastStaff ? (
+          <>
+            {memo.related.href && memo.actionLabel ? (
+              <Link href={memo.related.href} className={cn(FEED_PRIMARY, "w-[220px]")}>
+                {memo.actionLabel}
+                <Icon src="/icons/arrow-up-right.svg" className="size-3" />
+              </Link>
+            ) : null}
+            <MemoReplyDialog
+              memoId={memo.id}
+              subject={memo.subject}
+              quote={lastStaff.body}
+              relatedLabel={memo.related.label}
+              action={replyToMemo}
+              triggerClassName={cn(FEED_OUTLINE, "w-[150px]")}
+            />
+            {memo.unreadForClient ? (
+              <form action={markMemoRead}>
+                <input type="hidden" name="memoId" value={memo.id} />
+                <button type="submit" className={cn(FEED_OUTLINE, "w-[150px]")}>
+                  Mark as read
+                </button>
+              </form>
+            ) : null}
+          </>
+        ) : undefined
+      }
+    />
   );
 }

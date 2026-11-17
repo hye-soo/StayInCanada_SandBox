@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { getClientIntake, getClientQuestionnaireSubmittedAt } from "@/lib/client-questionnaire.ts";
 import { INTAKE_CATEGORIES } from "@/lib/data/intake-steps.ts";
-import { getCategoryStatus } from "@/lib/intake.ts";
+import { getCategoryReview, getCategoryStatus } from "@/lib/intake.ts";
 import { getQuestionnaireFlagStore } from "@/lib/questionnaire-flag-store.ts";
 import { getIntakeReviewStore } from "@/lib/intake-review-store.ts";
 import { getClientIdentity } from "@/lib/client-identity.ts";
 import { getIntakeReviewRows, INTAKE_REVIEW_LABEL, type IntakeReviewStatus } from "@/lib/intake-review.ts";
 import { ArrowLink } from "@/components/ui/arrow-link";
 import { StatusPill } from "@/components/patterns/status-pill";
+import { IntakeAnswersDialog } from "@/components/patterns/intake-answers-dialog";
 
 const PILL_TONE = {
   reviewed: "filled",
@@ -33,7 +34,8 @@ export default async function AdminClientIntakePage({ params }: PageProps<"/admi
     getQuestionnaireFlagStore().getFlags(clientId),
     getIntakeReviewStore().getReviewed(clientId)
   );
-  const firstName = getClientIdentity(clientId).name.split(" ")[0];
+  const clientName = getClientIdentity(clientId).name;
+  const firstName = clientName.split(" ")[0];
 
   return (
     <section className="flex flex-col gap-1">
@@ -64,7 +66,15 @@ export default async function AdminClientIntakePage({ params }: PageProps<"/admi
                 </div>
                 <StatusPill tone={PILL_TONE[row.status]}>{INTAKE_REVIEW_LABEL[row.status]}</StatusPill>
                 <span className="flex w-[130px] shrink-0 justify-end">
-                  {action ? <ArrowLink href={`/admin/${clientId}/intake/${row.categoryId}`}>{action}</ArrowLink> : null}
+                  {action === "View answers" ? (
+                    <IntakeAnswersDialog
+                      clientName={clientName}
+                      sectionLabel={row.label}
+                      groups={getCategoryReview(row.categoryId, answers)}
+                    />
+                  ) : action ? (
+                    <ArrowLink href={`/admin/${clientId}/intake/${row.categoryId}`}>{action}</ArrowLink>
+                  ) : null}
                 </span>
               </li>
             );

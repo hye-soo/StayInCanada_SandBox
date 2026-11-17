@@ -2,10 +2,9 @@ import Link from "next/link";
 import { cn } from "cn";
 import { requireRole } from "@/lib/firebase/session.ts";
 import { getAllClientSummaries, getClientQueueRows } from "@/lib/client-directory.ts";
-import { VISA_TYPE_LABEL } from "@/lib/client-checklist.ts";
 import { getClientProfile } from "@/lib/client-profile.ts";
 import { getClientIdentity } from "@/lib/client-identity.ts";
-import { filterClientRows, type ClientListRow } from "@/lib/client-list.ts";
+import { filterClientRows, paginate, type ClientListRow } from "@/lib/client-list.ts";
 import { PageHeader } from "@/components/layouts/page-header";
 import { DataTable } from "@/components/patterns/data-table";
 import { ArrowLink } from "@/components/ui/arrow-link";
@@ -13,23 +12,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import type { VisaType } from "@/lib/types.ts";
 
-function buildRows(): ClientListRow[] {
+function buildRows(staffName: string | undefined): ClientListRow[] {
   const queue = new Map(getClientQueueRows().map((row) => [row.clientId, row]));
   return getAllClientSummaries().map((summary) => {
     const { name, email } = getClientIdentity(summary.clientId);
+    const profile = getClientProfile(summary.clientId);
     const counts = summary.checklistCounts;
     return {
       clientId: summary.clientId,
       name,
       email,
-      applicationId: getClientProfile(summary.clientId).applicationId,
-      visaType: summary.visaType,
-      visaTypeLabel: summary.visaTypeLabel,
+      applicationId: profile.applicationId,
+      applicationType: profile.applicationType,
       stageLabel: summary.stage.label,
       nextAction: queue.get(summary.clientId)?.nextAction ?? "—",
       needsAttention: counts.required + counts.changes_required + counts.submitted + counts.under_review > 0,
+      assignedToMe: Boolean(staffName) && profile.assignedAdvisorName === staffName,
     };
   });
 }
@@ -51,15 +50,25 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
 
 // Figma "All clients / Staff".
 export default async function AdminClientsPage({ searchParams }: PageProps<"/admin/clients">) {
-  await requireRole(["admin"]);
+  const { displayName } = await requireRole(["admin"]);
   const params = await searchParams;
-  const q = typeof params.q === "string" ? params.q : "";
-  const visaType = typeof params.visaType === "string" ? params.visaType : "";
-  const status = typeof params.status === "string" ? params.status : "";
+  const read = (name: string) => (typeof params[name] === "string" ? (params[name] as string) : "");
+  const q = read("q");
+  const applicationType = read("applicationType");
+  const status = read("status");
+  const assigned = read("assigned");
 
-  const allRows = buildRows();
-  const rows = filterClientRows(allRows, { q, visaType, status });
-  const needsAttentionCount = filterClientRows(allRows, { status: "needs_attention" }).length;
+  const allRows = buildRows(displayName);
+  const rows = filterClientRows(allRows, { q, applicationType, status, assigned });
+  const { items: pageRows, page, pageCount } = paginate(rows, Number(read("page")) || 1);
+  const assignedCount = filterClientRows(allRows, { assigned: "me" }).length;
+  const applicationTypes = [...new Set(allRows.map((row) => row.applicationType))].sort();
+  const query = (changes: Record<string, string>) => {
+    const next = new URLSearchParams({ q, applicationType, status, assigned, ...changes });
+    for (const [key, value] of [...next.entries()]) if (!value) next.delete(key);
+    const text = next.toString();
+    return text ? `/admin/clients?${text}` : "/admin/clients";
+  };
 
   return (
     <main className="flex flex-col gap-5 pt-2 lg:pt-6">
@@ -69,17 +78,18 @@ export default async function AdminClientsPage({ searchParams }: PageProps<"/adm
       />
 
       <form action="/admin/clients" className="flex flex-wrap items-end gap-3">
+        {assigned ? <input type="hidden" name="assigned" value={assigned} /> : null}
         <div className="flex min-w-60 flex-[440] flex-col gap-2">
           <Label htmlFor="q">Search clients</Label>
           <Input id="q" name="q" defaultValue={q} placeholder="Name, email or application ID" />
         </div>
         <div className="flex min-w-48 flex-[280] flex-col gap-2">
-          <Label htmlFor="visaType">Application type</Label>
-          <Select id="visaType" name="visaType" defaultValue={visaType}>
+          <Label htmlFor="applicationType">Application type</Label>
+          <Select id="applicationType" name="applicationType" defaultValue={applicationType}>
             <option value="">All application types</option>
-            {(Object.keys(VISA_TYPE_LABEL) as VisaType[]).map((type) => (
+            {applicationTypes.map((type) => (
               <option key={type} value={type}>
-                {VISA_TYPE_LABEL[type]}
+                {type}
               </option>
             ))}
           </Select>
@@ -97,18 +107,18 @@ export default async function AdminClientsPage({ searchParams }: PageProps<"/adm
       </form>
 
       <div className="flex flex-wrap gap-4">
-        <Chip href="/admin/clients" active={!q && !visaType && !status}>
+        <Chip href={query({ assigned: "", page: "" })} active={!assigned}>
           All clients ({allRows.length})
         </Chip>
-        <Chip href="/admin/clients?status=needs_attention" active={status === "needs_attention" && !q && !visaType}>
-          Needs attention ({needsAttentionCount})
+        <Chip href={query({ assigned: "me", page: "" })} active={assigned === "me"}>
+          Assigned to me ({assignedCount})
         </Chip>
       </div>
 
       <DataTable
         columns={["Client", "Application", "Stage", "Next action", "Action"]}
         emptyMessage="No clients match your search."
-        rows={rows.map((row) => ({
+        rows={pageRows.map((row) => ({
           key: row.clientId,
           cells: [
             <span key="client" className="flex flex-col">
@@ -116,7 +126,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps<"/adm
               <span>{row.email}</span>
             </span>,
             <span key="application" className="flex flex-col">
-              <span>{row.visaTypeLabel}</span>
+              <span>{row.applicationType}</span>
               <span>{row.applicationId}</span>
             </span>,
             row.stageLabel,
@@ -128,9 +138,25 @@ export default async function AdminClientsPage({ searchParams }: PageProps<"/adm
         }))}
       />
 
-      <p className="px-2 text-sm text-foreground">
-        Showing {rows.length} of {allRows.length} clients
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-2 text-sm text-foreground">
+        <p>
+          Showing {pageRows.length} of {rows.length} clients • Page {page} of {pageCount}
+        </p>
+        {pageCount > 1 ? (
+          <nav aria-label="Pages" className="flex gap-2">
+            {page > 1 ? (
+              <Link href={query({ page: String(page - 1) })} className="rounded-full border border-input px-4 py-1.5 font-semibold hover:bg-secondary">
+                Previous
+              </Link>
+            ) : null}
+            {page < pageCount ? (
+              <Link href={query({ page: String(page + 1) })} className="rounded-full border border-input px-4 py-1.5 font-semibold hover:bg-secondary">
+                Next
+              </Link>
+            ) : null}
+          </nav>
+        ) : null}
+      </div>
     </main>
   );
 }

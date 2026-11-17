@@ -3,7 +3,8 @@ import Link from "next/link";
 import { cn } from "cn";
 
 interface MemoBubbleProps {
-  avatarSrc: string;
+  // Without a photo the author's initials are shown.
+  avatarSrc?: string;
   authorName: string;
   // Small caption under the avatar, e.g. "Me".
   authorCaption?: string;
@@ -46,13 +47,31 @@ export function MemoBubble({
   return (
     <div className={cn("flex items-start gap-1", right && "flex-row-reverse")}>
       <div className={cn("flex shrink-0 flex-col items-center", compact ? "mt-0 gap-0.5" : "mt-[19px] gap-1")}>
-        <Image
-          src={avatarSrc}
-          alt={authorName}
-          width={66}
-          height={66}
-          className={cn("rounded-full bg-peach object-cover", compact ? "size-12" : "size-[66px]")}
-        />
+        {avatarSrc ? (
+          <Image
+            src={avatarSrc}
+            alt={authorName}
+            width={66}
+            height={66}
+            className={cn("rounded-full bg-peach object-cover", compact ? "size-12" : "size-[66px]")}
+          />
+        ) : (
+          <span
+            role="img"
+            aria-label={authorName}
+            className={cn(
+              "flex items-center justify-center rounded-full bg-lime-soft font-semibold text-navy",
+              compact ? "size-12 text-sm" : "size-[66px] text-lg"
+            )}
+          >
+            {authorName
+              .split(" ")
+              .map((part) => part[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </span>
+        )}
         {authorCaption ? (
           <span className={cn("text-foreground", compact ? "mt-1 text-xs text-muted-foreground" : "text-sm")}>{authorCaption}</span>
         ) : null}

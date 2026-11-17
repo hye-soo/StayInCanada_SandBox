@@ -28,6 +28,9 @@ export interface Memo {
   startedBy: MemoAuthor;
   waitingOn: "client" | "team";
   unreadForClient: boolean;
+  // Staff side: a client's new memo or reply is unread until a staff
+  // member opens it or answers.
+  unreadForStaff: boolean;
   createdAt: number;
   updatedAt: number;
   // Monotonic, so ordering is stable even within the same millisecond.
@@ -49,6 +52,9 @@ export interface MemoStore {
   create(clientId: string, memo: NewMemo): Memo;
   reply(clientId: string, memoId: string, message: Omit<MemoMessage, "at">): Memo | undefined;
   markRead(clientId: string, memoId: string): void;
+  markReadByStaff(clientId: string, memoId: string): void;
+  // Every client's memos, newest activity first (staff Memo & Updates).
+  listAll(): { clientId: string; memo: Memo }[];
   // Client's own memo, only while nobody has replied yet.
   edit(clientId: string, memoId: string, changes: { subject: string; body: string }): boolean;
   remove(clientId: string, memoId: string): boolean;
@@ -88,6 +94,7 @@ class InMemoryMemoStore implements MemoStore {
       startedBy: input.from,
       waitingOn: input.from === "staff" ? "client" : "team",
       unreadForClient: input.from === "staff",
+      unreadForStaff: input.from === "client",
       createdAt: now,
       updatedAt: now,
       seq: this.nextSeq++,
@@ -103,6 +110,7 @@ class InMemoryMemoStore implements MemoStore {
     memo.messages.push({ ...message, at: now });
     memo.waitingOn = message.from === "staff" ? "client" : "team";
     memo.unreadForClient = message.from === "staff";
+    memo.unreadForStaff = message.from === "client";
     memo.updatedAt = now;
     memo.seq = this.nextSeq++;
     return memo;
@@ -111,6 +119,17 @@ class InMemoryMemoStore implements MemoStore {
   markRead(clientId: string, memoId: string): void {
     const memo = this.get(clientId, memoId);
     if (memo) memo.unreadForClient = false;
+  }
+
+  markReadByStaff(clientId: string, memoId: string): void {
+    const memo = this.get(clientId, memoId);
+    if (memo) memo.unreadForStaff = false;
+  }
+
+  listAll(): { clientId: string; memo: Memo }[] {
+    return [...this.byClient.entries()]
+      .flatMap(([clientId, memos]) => memos.map((memo) => ({ clientId, memo })))
+      .sort((a, b) => b.memo.seq - a.memo.seq);
   }
 
   private editable(memo: Memo | undefined): memo is Memo {
@@ -141,7 +160,9 @@ class InMemoryMemoStore implements MemoStore {
 const holder = globalThis as typeof globalThis & { __flowouiMemos?: MemoStore };
 
 export function getMemoStore(): MemoStore {
-  holder.__flowouiMemos ??= new InMemoryMemoStore();
+  // After a code change in dev the old instance (old class) is replaced,
+  // so it never lacks newly added methods.
+  if (!(holder.__flowouiMemos instanceof InMemoryMemoStore)) holder.__flowouiMemos = new InMemoryMemoStore();
   return holder.__flowouiMemos;
 }
 

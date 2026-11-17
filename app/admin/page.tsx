@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/firebase/session.ts";
 import { getChecklistStore } from "@/lib/checklist-store.ts";
-import { getClientChecklist, VISA_TYPE_LABEL } from "@/lib/client-checklist.ts";
+import { getClientChecklist } from "@/lib/client-checklist.ts";
 import { getClientProfile } from "@/lib/client-profile.ts";
 import { getClientIdentity } from "@/lib/client-identity.ts";
 import { getAdminOverview, type OverviewClient } from "@/lib/staff-overview.ts";
@@ -12,12 +12,13 @@ import { DataTable } from "@/components/patterns/data-table";
 import { StatCard } from "@/components/patterns/stat-card";
 
 function overviewClient(clientId: string): OverviewClient {
-  const { visaType, items } = getClientChecklist(clientId);
+  const { items } = getClientChecklist(clientId);
+  const profile = getClientProfile(clientId);
   return {
     clientId,
     name: getClientIdentity(clientId).name,
-    applicationId: getClientProfile(clientId).applicationId,
-    visaTypeLabel: VISA_TYPE_LABEL[visaType],
+    applicationId: profile.applicationId,
+    visaTypeLabel: profile.applicationType,
     items,
   };
 }

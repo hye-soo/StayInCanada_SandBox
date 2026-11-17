@@ -7,18 +7,24 @@ export interface ClientProfile {
   // Mock placeholders until applications have real records.
   applicationId: string;
   dueDate: string;
+  // Label shown on staff screens ("Work permit", ...). The app itself
+  // still runs one checklist/intake for every type (MVP).
+  applicationType: string;
 }
 
 export interface ClientProfileStore {
   getProfile(clientId: string): ClientProfile;
+  updateProfile(clientId: string, changes: Partial<ClientProfile>): void;
 }
 
 function defaultProfile(): ClientProfile {
   return {
-    assignedAdvisorName: "Alex Morgan",
+    // Maya is the demo's staff member (case coordinator).
+    assignedAdvisorName: "Maya Patel",
     assignedRcicName: "Jean Martin",
     applicationId: "FO-2026-014",
     dueDate: "06/14/2027",
+    applicationType: "Study permit extension",
   };
 }
 
@@ -33,6 +39,10 @@ class InMemoryClientProfileStore implements ClientProfileStore {
     }
     return profile;
   }
+
+  updateProfile(clientId: string, changes: Partial<ClientProfile>): void {
+    this.profilesByClient.set(clientId, { ...this.getProfile(clientId), ...changes });
+  }
 }
 
 let store: ClientProfileStore | undefined;
@@ -40,4 +50,9 @@ let store: ClientProfileStore | undefined;
 export function getClientProfileStore(): ClientProfileStore {
   if (!store) store = new InMemoryClientProfileStore();
   return store;
+}
+
+// Demo only: forget every profile override.
+export function resetClientProfileStore(): void {
+  store = undefined;
 }

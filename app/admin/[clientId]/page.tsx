@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getClientChecklist, VISA_TYPE_LABEL } from "@/lib/client-checklist.ts";
+import { getClientChecklist } from "@/lib/client-checklist.ts";
 import { getClientProfile } from "@/lib/client-profile.ts";
 import { getClientIdentity } from "@/lib/client-identity.ts";
 import { getClientIntake } from "@/lib/client-questionnaire.ts";
@@ -26,7 +26,7 @@ function InfoRow({ icon, children }: { icon: string; children: React.ReactNode }
 // Figma "All clients_Profile / Staff" — Overview tab.
 export default async function AdminClientOverviewPage({ params }: PageProps<"/admin/[clientId]">) {
   const { clientId } = await params;
-  const { visaType, items } = getClientChecklist(clientId);
+  const { items } = getClientChecklist(clientId);
   const profile = getClientProfile(clientId);
   const identity = getClientIdentity(clientId);
   const summary = getClientSummary(clientId);
@@ -38,7 +38,7 @@ export default async function AdminClientOverviewPage({ params }: PageProps<"/ad
       <div className="grid grid-cols-1 gap-[21px] lg:grid-cols-[minmax(0,719fr)_minmax(0,380fr)]">
         <ContentCard title="Active Application">
           <p className="px-1 text-base text-foreground">
-            {VISA_TYPE_LABEL[visaType]}
+            {profile.applicationType}
             <br />
             {profile.applicationId}
           </p>

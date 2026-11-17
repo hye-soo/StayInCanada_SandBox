@@ -129,6 +129,7 @@ const required = (formData: FormData, names: string[]) =>
 export function MemoComposeDialog({
   mode,
   options,
+  clientOptions,
   defaults,
   action,
   triggerLabel,
@@ -136,6 +137,8 @@ export function MemoComposeDialog({
 }: {
   mode: "new" | "edit";
   options: RelatedOption[];
+  // Staff only: which client the memo goes to.
+  clientOptions?: RelatedOption[];
   defaults?: { memoId?: string; subject?: string; related?: string; message?: string };
   action: Action;
   triggerLabel: string;
@@ -147,14 +150,38 @@ export function MemoComposeDialog({
       title={edit ? "Edit memo" : "New memo"}
       sendLabel={edit ? "Save memo" : "Send memo"}
       action={action}
-      validate={(formData) => required(formData, ["subject", "message"])}
+      validate={(formData) => required(formData, clientOptions ? ["clientId", "subject", "message"] : ["subject", "message"])}
       trigger={edit ? <Pencil className="size-4" aria-hidden /> : triggerLabel}
       triggerAriaLabel={edit ? triggerLabel : undefined}
       triggerClassName={triggerClassName}
     >
       {(invalid) => (
         <>
-          <p className="text-sm text-muted-foreground">Send a note or question to your case team.</p>
+          <p className="text-sm text-muted-foreground">
+            {clientOptions ? "Send a note or request to a client. They'll see it in their Memo & Updates." : "Send a note or question to your case team."}
+          </p>
+          {clientOptions ? (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="memo-client">Client</Label>
+              <Select
+                id="memo-client"
+                name="clientId"
+                defaultValue=""
+                aria-invalid={invalid.has("clientId") || undefined}
+                aria-describedby={invalid.has("clientId") ? "memo-client-error" : undefined}
+              >
+                <option value="">Choose a client</option>
+                {clientOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+              <FieldError show={invalid.has("clientId")} id="memo-client-error">
+                Choose who the memo is for.
+              </FieldError>
+            </div>
+          ) : null}
           {defaults?.memoId ? <input type="hidden" name="memoId" value={defaults.memoId} /> : null}
           <div className="flex flex-col gap-2">
             <Label htmlFor="memo-subject">Subject</Label>
@@ -213,6 +240,7 @@ export function MemoReplyDialog({
   relatedLabel,
   action,
   triggerClassName,
+  hidden,
 }: {
   memoId: string;
   subject: string;
@@ -220,6 +248,8 @@ export function MemoReplyDialog({
   relatedLabel: string;
   action: Action;
   triggerClassName: string;
+  // Extra form fields, e.g. the client id on the staff side.
+  hidden?: Record<string, string>;
 }) {
   return (
     <MemoDialog
@@ -233,6 +263,9 @@ export function MemoReplyDialog({
       {(invalid) => (
         <>
           <input type="hidden" name="memoId" value={memoId} />
+          {Object.entries(hidden ?? {}).map(([name, value]) => (
+            <input key={name} type="hidden" name={name} value={value} />
+          ))}
           <div className="flex flex-col gap-1.5 rounded-lg bg-secondary px-4 py-3">
             <p className="text-base font-semibold">{subject}</p>
             <p className="text-sm">{quote}</p>

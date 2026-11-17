@@ -29,7 +29,7 @@ export function AuthShell({ heroTitle, heroBody, title, children }: AuthShellPro
         />
       </div>
       <section className="relative hidden flex-1 flex-col gap-10 px-16 pt-52 pb-16 text-primary-foreground lg:flex">
-        <Logo className="absolute left-16 top-[72px] size-12 text-white" />
+        <Logo variant="mark-curved" className="absolute left-16 top-[72px] size-12 text-white" />
         <p className="relative max-w-[38rem] text-5xl font-extralight leading-[56px]">{heroTitle}</p>
         <div className="relative flex max-w-[38rem] flex-col gap-10 text-2xl font-semibold">{heroBody}</div>
       </section>
@@ -37,7 +37,7 @@ export function AuthShell({ heroTitle, heroBody, title, children }: AuthShellPro
       <section className="relative flex w-full flex-col justify-center bg-background px-6 py-12 sm:px-12 rounded-[30px] lg:w-1/2 lg:max-w-[45rem] lg:rounded-none lg:rounded-l-[50px] lg:px-[72px]">
         <div className="mx-auto flex w-full max-w-[36rem] flex-col gap-6">
           <div className="flex flex-col gap-1 text-foreground">
-            <Logo className="size-9 text-navy" />
+            <Logo variant="mark-curved" className="size-9 text-ink" />
             <h1 className="text-[32px] font-bold leading-10">{title}</h1>
           </div>
           {children}

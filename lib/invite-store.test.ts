@@ -59,3 +59,14 @@ test("resetInviteStore makes a used seeded invite valid again", async () => {
   resetInviteStore();
   assert.equal(isInviteValid(getInviteStore().get("welcome-alice")), true);
 });
+
+test("list shows every invitation newest first, with its application type", () => {
+  const before = getInviteStore().list().length;
+  const older = getInviteStore().create("older@example.com", "Older", "Work permit");
+  const newer = getInviteStore().create("newer@example.com", "Newer");
+  const list = getInviteStore().list();
+  assert.equal(list.length, before + 2);
+  assert.equal(list[0]!.token, newer.token);
+  assert.equal(list.find((invite) => invite.token === older.token)?.applicationType, "Work permit");
+  assert.equal(newer.applicationType, "Study permit extension");
+});

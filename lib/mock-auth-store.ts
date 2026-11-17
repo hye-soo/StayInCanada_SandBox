@@ -6,6 +6,7 @@ export type SignInResult = { user: MockUser } | { error: SignInError };
 
 export interface MockAuthStore {
   findById(id: string): MockUser | undefined;
+  findByEmail(email: string): MockUser | undefined;
   signIn(email: string, password: string): SignInResult;
   activateClient(input: { email: string; name: string; password: string }): MockUser;
 }
@@ -20,6 +21,7 @@ export function createMockAuthStore(seed: MockUser[]): MockAuthStore {
 
   return {
     findById: (id) => users.find((user) => user.id === id),
+    findByEmail,
 
     signIn(email, password) {
       const user = findByEmail(email);

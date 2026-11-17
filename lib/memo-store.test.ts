@@ -43,3 +43,24 @@ test("memos list newest activity first, per client", () => {
   assert.deepEqual(store.list("uid-m-3").map((memo) => memo.id), [first.id]);
   assert.deepEqual(store.list("uid-m-other"), []);
 });
+
+test("staff have their own unread state, and see every client's memos", () => {
+  const store = getMemoStore();
+  const question = store.create("uid-m-staff-a", { from: "client", authorName: "A", subject: "Hotel?", body: "Include it?", related });
+  assert.equal(question.unreadForStaff, true);
+  store.markReadByStaff("uid-m-staff-a", question.id);
+  assert.equal(store.get("uid-m-staff-a", question.id)!.unreadForStaff, false);
+
+  store.reply("uid-m-staff-a", question.id, { from: "client", authorName: "A", body: "Also the hostel?" });
+  assert.equal(store.get("uid-m-staff-a", question.id)!.unreadForStaff, true);
+  store.reply("uid-m-staff-a", question.id, { from: "staff", authorName: "Maya", body: "Yes, both." });
+  assert.equal(store.get("uid-m-staff-a", question.id)!.unreadForStaff, false);
+
+  const note = store.create("uid-m-staff-b", { from: "staff", authorName: "Maya", subject: "Hi", body: "Welcome", related });
+  assert.equal(note.unreadForStaff, false);
+  const all = store.listAll().filter(({ clientId }) => clientId.startsWith("uid-m-staff-"));
+  assert.deepEqual(all.map(({ clientId, memo }) => [clientId, memo.id]), [
+    ["uid-m-staff-b", note.id],
+    ["uid-m-staff-a", question.id],
+  ]);
+});

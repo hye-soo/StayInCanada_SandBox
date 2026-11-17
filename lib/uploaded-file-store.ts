@@ -29,7 +29,9 @@ class InMemoryUploadedFileStore implements UploadedFileStore {
 const holder = globalThis as typeof globalThis & { __flowouiUploadedFiles?: UploadedFileStore };
 
 export function getUploadedFileStore(): UploadedFileStore {
-  holder.__flowouiUploadedFiles ??= new InMemoryUploadedFileStore();
+  // After a code change in dev the old instance (old class) is replaced,
+  // so it never lacks newly added methods.
+  if (!(holder.__flowouiUploadedFiles instanceof InMemoryUploadedFileStore)) holder.__flowouiUploadedFiles = new InMemoryUploadedFileStore();
   return holder.__flowouiUploadedFiles;
 }
 

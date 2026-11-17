@@ -32,4 +32,7 @@ export const MOCK_USERS: MockUser[] = [
 // Open /invite/welcome-alice to accept Alice's invitation (A01).
 export const MOCK_INVITES = [
     { token: "welcome-alice", email: "alice@example.com", name: "Alice Chang" },
+    // Demo only: invitations still waiting on the client (staff Invitations page).
+    { token: "welcome-noah", email: "noah@example.com", name: "Noah Kim", applicationType: "Work permit", daysAgo: 2 },
+    { token: "welcome-lena", email: "lena@example.com", name: "Lena Ortiz", applicationType: "Visitor extension", daysAgo: 6 },
 ];

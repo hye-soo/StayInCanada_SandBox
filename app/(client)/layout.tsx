@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/firebase/session.ts";
+import { ensureDemoClients } from "@/lib/demo-clients.ts";
 import { AppShell } from "@/components/layouts/app-shell";
 import type { SidebarNavItem } from "@/components/layouts/sidebar-nav";
 
@@ -12,5 +13,7 @@ const NAV_ITEMS: SidebarNavItem[] = [
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   await requireRole(["client"]);
+  // Demo data (staff memos, caseload) so feeds aren't empty after a reset.
+  ensureDemoClients();
   return <AppShell navItems={NAV_ITEMS}>{children}</AppShell>;
 }

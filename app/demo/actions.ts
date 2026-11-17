@@ -20,7 +20,7 @@ import { resetUploadedFileStore } from "@/lib/uploaded-file-store.ts";
 import { getMemoStore, resetMemoStore } from "@/lib/memo-store.ts";
 import { getNotificationStore } from "@/lib/notification-store.ts";
 import { openChangeRequestMemo } from "@/lib/apply-checklist-action.ts";
-import { getClientProfileStore } from "@/lib/client-profile-store.ts";
+import { getClientProfileStore, resetClientProfileStore } from "@/lib/client-profile-store.ts";
 import { resetQuestionnaireFlagStore } from "@/lib/questionnaire-flag-store.ts";
 import { resetIntakeReviewStore } from "@/lib/intake-review-store.ts";
 import { clearSession } from "@/lib/firebase/session-actions.ts";
@@ -39,6 +39,7 @@ export async function resetDemo() {
   resetChecklistStore();
   resetUploadedFileStore();
   resetMemoStore();
+  resetClientProfileStore();
   await clearSession();
   (await cookies()).delete(LAST_USER_COOKIE_NAME);
   redirect("/demo");

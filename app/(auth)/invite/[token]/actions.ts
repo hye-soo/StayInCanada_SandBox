@@ -1,5 +1,7 @@
 "use server";
 
+import { getClientProfileStore } from "@/lib/client-profile-store.ts";
+import { getChecklistStore } from "@/lib/checklist-store.ts";
 import { redirect } from "next/navigation";
 import { getInviteStore, isInviteValid } from "@/lib/invite-store.ts";
 import { getMockAuthStore } from "@/lib/mock-auth-store.ts";
@@ -40,6 +42,9 @@ export async function acceptInvite(
     name: input.name,
     password: input.password,
   });
+  getClientProfileStore().updateProfile(user.id, { applicationType: invite.applicationType });
+  // Touching the checklist puts the new client on the staff screens.
+  getChecklistStore().getChecklist(user.id);
   getNotificationStore().create(
     user.id,
     "Welcome to FlowOui!",

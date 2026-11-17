@@ -19,12 +19,18 @@ export interface SidebarNavItem {
   fallback?: boolean;
 }
 
+// Signed-in staff member, shown at the foot of the sidebar (Figma S01).
+export interface SidebarUser {
+  name: string;
+  role: string;
+}
+
 const ITEM_CLASS =
   "flex h-12 items-center gap-2 rounded-full pr-3 pl-[14px] text-sm font-semibold whitespace-nowrap transition-colors";
 
 // Navy rounded sidebar from Figma "Navigation / Client". Items come in
 // as props so staff workspaces can reuse it with their own links.
-export function SidebarNav({ items }: { items: SidebarNavItem[] }) {
+export function SidebarNav({ items, user }: { items: SidebarNavItem[]; user?: SidebarUser }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -81,6 +87,26 @@ export function SidebarNav({ items }: { items: SidebarNavItem[] }) {
           Sign Out
         </button>
       </nav>
+
+      {user ? (
+        <div className="mt-auto hidden items-center gap-3 px-1 lg:flex">
+          <span
+            aria-hidden
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sky-tint text-xs font-semibold text-navy"
+          >
+            {user.name
+              .split(" ")
+              .map((part) => part[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-semibold">{user.name}</span>
+            <span className="truncate text-xs text-icon-muted">{user.role}</span>
+          </span>
+        </div>
+      ) : null}
     </aside>
   );
 }

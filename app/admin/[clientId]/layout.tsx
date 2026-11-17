@@ -1,8 +1,8 @@
 import { requireRole } from "@/lib/firebase/session.ts";
-import { getClientChecklist, VISA_TYPE_LABEL } from "@/lib/client-checklist.ts";
 import { getClientProfile } from "@/lib/client-profile.ts";
 import { getClientIdentity } from "@/lib/client-identity.ts";
 import { ProfileHeader } from "@/components/layouts/profile-header";
+import { DEMO_CLIENTS } from "@/lib/data/demo-clients.ts";
 import { TabNav } from "@/components/patterns/tab-nav";
 
 // Figma "All clients_Profile / Staff": profile heading + tabs shared by
@@ -10,8 +10,7 @@ import { TabNav } from "@/components/patterns/tab-nav";
 export default async function AdminClientLayout({ children, params }: LayoutProps<"/admin/[clientId]">) {
   await requireRole(["admin"]);
   const { clientId } = await params;
-  const { visaType } = getClientChecklist(clientId);
-  const { applicationId } = getClientProfile(clientId);
+  const { applicationId, applicationType } = getClientProfile(clientId);
   const base = `/admin/${clientId}`;
 
   return (
@@ -19,8 +18,8 @@ export default async function AdminClientLayout({ children, params }: LayoutProp
       <div className="flex flex-col gap-3 print:hidden">
         <ProfileHeader
           name={getClientIdentity(clientId).name}
-          subtitle={`Client profile / Application ${applicationId} • ${VISA_TYPE_LABEL[visaType]}`}
-          avatarSrc="/overview/client-avatar.png"
+          subtitle={`Client profile / Application ${applicationId} • ${applicationType}`}
+          avatarSrc={DEMO_CLIENTS.some((client) => client.id === clientId) ? undefined : "/overview/client-avatar.png"}
         />
         <TabNav
           tabs={[

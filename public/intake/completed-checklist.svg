@@ -1,0 +1,25 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="635" height="214" viewBox="0 0 635 214" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Completed checklist illustration" clip-path="url(#clip0_0_233)">
+<rect width="635" height="214" fill="#E3F8FA"/>
+<path id="Vector" d="M619 0H16C7.16344 0 0 7.16344 0 16V198C0 206.837 7.16344 214 16 214H619C627.837 214 635 206.837 635 198V16C635 7.16344 627.837 0 619 0Z" fill="#E3F4F6"/>
+<path id="Vector_2" d="M228.465 213.999C218.187 206.681 210.5 196.285 206.515 184.314C202.53 172.343 202.452 159.414 206.294 147.396C210.135 135.378 217.696 124.891 227.886 117.451C238.076 110.01 250.367 106 262.984 106C275.601 106 287.892 110.01 298.082 117.451C308.272 124.891 315.833 135.378 319.675 147.396C323.516 159.414 323.438 172.343 319.453 184.314C315.468 196.285 307.782 206.681 297.503 213.999H228.465Z" fill="#E8F1F2"/>
+<path id="Vector_3" d="M287.983 49.7539H359.373L373.788 65.3398V162.751C373.788 171.064 370.127 175.22 362.805 175.22H287.983C280.661 175.22 277 171.064 277 162.751V62.2226C277 53.9101 280.661 49.7539 287.983 49.7539Z" fill="white" stroke-width="2.10258" stroke="#13244B"/>
+<path id="Vector_4" d="M359.449 49.7539V63.7344C359.449 64.77 360.132 65.2878 361.498 65.2878H373.788" stroke-width="1.94684" stroke="#13244B"/>
+<path id="Vector_5" d="M291.339 81.8063L296.742 87.9917L306.873 74.8477" stroke-width="3.11494" stroke-linecap="round" stroke-linejoin="round" stroke="#006494"/>
+<path id="Vector_6" d="M291.339 112.873L296.742 119.058L306.873 105.914" stroke-width="3.11494" stroke-linecap="round" stroke-linejoin="round" stroke="#006494"/>
+<path id="Vector_7" d="M291.339 145.134L296.742 151.32L306.873 138.176" stroke-width="3.11494" stroke-linecap="round" stroke-linejoin="round" stroke="#006494"/>
+<g id="Vector_8">
+<path d="M318.822 78.4297H358.254ZM318.822 86.2226H344.657ZM318.822 110.381H358.254ZM318.822 118.174H344.657ZM318.822 142.332H358.254ZM318.822 150.125H344.657Z" fill="black"/>
+<path d="M318.822 78.4297H358.254M318.822 86.2226H344.657M318.822 110.381H358.254M318.822 118.174H344.657M318.822 142.332H358.254M318.822 150.125H344.657" stroke-width="3.11494" stroke-linecap="round" stroke="#E8F1F2"/>
+</g>
+<g id="Vector_9">
+<path d="M385.737 56.9237L390.756 39ZM396.492 63.9374L410.114 49.9101ZM401.51 74.8475H418Z" fill="black"/>
+<path d="M385.737 56.9237L390.756 39M396.492 63.9374L410.114 49.9101M401.51 74.8475H418" stroke-width="2.3362" stroke-linecap="round" stroke="#13244B"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_233">
+<rect width="635" height="214" fill="white"/>
+</clipPath>
+</defs>
+</svg>

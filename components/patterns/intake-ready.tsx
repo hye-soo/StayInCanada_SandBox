@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, ChevronRight, Info } from "lucide-react";
 import { INTAKE_CATEGORIES } from "@/lib/data/intake-steps.ts";
@@ -78,17 +79,13 @@ export function IntakeReady({ variant, answers, visaLabel, applicationId }: Inta
         </section>
 
         <section className="flex flex-col gap-6 rounded-2xl border border-track bg-card p-6">
-          <div aria-hidden className="flex h-[175px] items-center justify-center rounded-[15px] bg-secondary">
-            <div className="relative flex h-[119px] w-24 flex-col justify-center gap-4 rounded-[10px] border border-navy bg-card px-5">
-              <span className="absolute top-0 right-0 size-5 rounded-tr-[10px] bg-sky-tint" />
-              {[0, 1, 2].map((row) => (
-                <span key={row} className="flex items-center gap-2">
-                  <Check className="size-4 text-primary" strokeWidth={3} />
-                  <span className="h-[3px] w-8 rounded-sm bg-icon-muted" />
-                </span>
-              ))}
-            </div>
-          </div>
+          <Image
+            src="/intake/completed-checklist.svg"
+            alt=""
+            width={635}
+            height={214}
+            className="h-auto w-full rounded-[15px]"
+          />
           <div className="flex flex-col gap-3 px-5">
             <h2 className="text-3xl font-semibold text-foreground">{copy.cardTitle}</h2>
             <p className="text-[17px] text-foreground">
@@ -106,7 +103,7 @@ export function IntakeReady({ variant, answers, visaLabel, applicationId }: Inta
         </section>
       </div>
 
-      <aside className="flex gap-3 rounded-[14px] bg-secondary px-6 py-5">
+      <aside className="flex gap-3 rounded-[14px] bg-aqua-tint px-6 py-5">
         <Info className="mt-0.5 size-6 shrink-0 text-muted-foreground" aria-hidden />
         <div className="flex flex-col gap-1">
           <p className="text-lg font-semibold text-foreground">{copy.noteTitle}</p>
