@@ -52,12 +52,12 @@ export function RequestChangesDialog({
       <dialog
         ref={dialog}
         aria-label="Request changes"
-        className="m-auto w-[min(640px,calc(100vw-2rem))] rounded-2xl bg-card p-8 text-foreground shadow-card backdrop:bg-navy/50"
+        className="m-auto w-[min(464px,calc(100vw-2rem))] rounded-xl bg-card p-5 text-foreground shadow-card backdrop:bg-navy/50"
       >
         <form key={version} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <h2 className="text-2xl font-semibold">Request changes</h2>
+              <h2 className="text-lg font-semibold">Request changes</h2>
               <p className="text-sm text-muted-foreground">
                 Review and edit the message before sending it to {clientFirstName}.
               </p>
@@ -66,27 +66,27 @@ export function RequestChangesDialog({
               type="button"
               aria-label="Close"
               onClick={() => dialog.current?.close()}
-              className="flex size-9 items-center justify-center rounded-full hover:bg-secondary"
+              className="flex size-8 items-center justify-center rounded-full hover:bg-secondary"
             >
-              <X className="size-5" />
+              <X className="size-4" />
             </button>
           </div>
 
-          <div className="flex items-center justify-between gap-3 rounded-lg bg-secondary px-4 py-3">
-            <div className="flex flex-col">
-              <p className="text-sm font-semibold">{requirement}</p>
-              <p className="text-xs text-muted-foreground">Feedback is attached to this requirement.</p>
-            </div>
-            {draft ? (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-card px-3 py-1 text-xs font-medium text-primary">
-                <Sparkles className="size-3.5" aria-hidden />
-                AI suggested draft
-              </span>
-            ) : null}
+          <div className="flex flex-col gap-1 rounded-md bg-secondary px-3 py-3">
+            <p className="text-sm font-semibold">{requirement}</p>
+            <p className="text-[11px] text-muted-foreground">Feedback is attached to this requirement.</p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="change-request-message">Message to client</Label>
+            {draft ? (
+              <span className="flex items-center gap-1 self-start rounded-full bg-aqua-tint px-2.5 py-1 text-[11px] font-semibold text-primary">
+                <Sparkles className="size-3" aria-hidden />
+                AI suggested draft
+              </span>
+            ) : null}
+            <Label htmlFor="change-request-message" className="text-sm font-semibold">
+              Message to client
+            </Label>
             <Textarea
               id="change-request-message"
               name="message"
@@ -95,33 +95,33 @@ export function RequestChangesDialog({
               placeholder="Explain what needs fixing"
               aria-invalid={empty || undefined}
               aria-describedby={empty ? "change-request-error" : "change-request-hint"}
-              className="min-h-28 rounded-3xl bg-card px-4 py-3 text-sm md:text-sm aria-invalid:border-coral aria-invalid:ring-0"
+              className="min-h-[76px] rounded-md border-primary/60 bg-card px-3 py-2 text-sm md:text-sm aria-invalid:border-coral aria-invalid:ring-0"
             />
             {empty ? (
-              <p id="change-request-error" className="text-sm text-destructive">
+              <p id="change-request-error" className="text-xs text-destructive">
                 Write a message for {clientFirstName}.
               </p>
             ) : (
-              <p id="change-request-hint" className="text-xs text-muted-foreground">
+              <p id="change-request-hint" className="text-[11px] text-muted-foreground">
                 {clientFirstName} will see the message beside the requirement.
               </p>
             )}
           </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-4">
-            <button
-              type="submit"
-              disabled={send.pending}
-              className="h-10 w-[220px] rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-            >
-              Send request
-            </button>
+          <div className="mt-2 flex justify-end gap-3">
             <button
               type="button"
               onClick={() => dialog.current?.close()}
-              className="h-10 w-[140px] rounded-full border border-border bg-card text-sm font-semibold text-primary hover:bg-secondary"
+              className="h-[42px] w-[132px] rounded-md border border-border bg-card text-sm font-semibold text-primary hover:bg-secondary"
             >
               Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={send.pending}
+              className="h-[42px] w-[184px] rounded-md bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+            >
+              Send request
             </button>
           </div>
         </form>

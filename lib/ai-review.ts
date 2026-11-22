@@ -92,7 +92,8 @@ export type AiOrbMode = "auto" | "working" | "idle";
 export interface AiReviewStore {
   orbMode: AiOrbMode;
   getDecision(clientId: string, itemId: string, fileName: string): FindingDecision | undefined;
-  decide(clientId: string, itemId: string, fileName: string, decision: FindingDecision): void;
+  // undefined reopens the finding (Figma 13 "Reopen finding").
+  decide(clientId: string, itemId: string, fileName: string, decision: FindingDecision | undefined): void;
   getApproval(clientId: string, itemId: string): { by: string; at: number } | undefined;
   approve(clientId: string, itemId: string, by: string, at?: number): void;
   latestApproval(): { clientId: string; itemId: string; by: string; at: number } | undefined;
@@ -107,8 +108,10 @@ class InMemoryAiReviewStore implements AiReviewStore {
     return this.decisions.get(`${clientId}/${itemId}/${fileName}`);
   }
 
-  decide(clientId: string, itemId: string, fileName: string, decision: FindingDecision) {
-    this.decisions.set(`${clientId}/${itemId}/${fileName}`, decision);
+  decide(clientId: string, itemId: string, fileName: string, decision: FindingDecision | undefined) {
+    const key = `${clientId}/${itemId}/${fileName}`;
+    if (decision) this.decisions.set(key, decision);
+    else this.decisions.delete(key);
   }
 
   getApproval(clientId: string, itemId: string) {

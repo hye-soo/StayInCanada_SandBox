@@ -38,6 +38,8 @@ test("ai review store: decisions are per uploaded file; latest approval wins", (
   store.decide("a", "passport", "v1.pdf", "confirmed");
   assert.equal(store.getDecision("a", "passport", "v1.pdf"), "confirmed");
   assert.equal(store.getDecision("a", "passport", "v2.pdf"), undefined);
+  store.decide("a", "passport", "v1.pdf", undefined);
+  assert.equal(store.getDecision("a", "passport", "v1.pdf"), undefined);
 
   store.approve("a", "passport", "Maya", 1);
   store.approve("b", "passport", "Maya", 2);

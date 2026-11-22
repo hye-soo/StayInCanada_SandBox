@@ -125,7 +125,8 @@ export async function startAiPassportDemo() {
     status: "submitted",
     fileName,
     fileSize: bytes.length,
-    submittedAt: Date.now(),
+    // Four days ago, so it heads the oldest-first queue like Figma 01.
+    submittedAt: Date.now() - 4 * 24 * 60 * 60 * 1000,
     staffComment: undefined,
     previousUpload: undefined,
   });

@@ -4,7 +4,7 @@ interface DataTableProps {
   title?: string;
   meta?: string;
   columns: string[];
-  rows: { key: string; cells: ReactNode[] }[];
+  rows: { key: string; cells: ReactNode[]; className?: string }[];
   emptyMessage: string;
 }
 
@@ -39,7 +39,7 @@ export function DataTable({ title, meta, columns, rows, emptyMessage }: DataTabl
               </tr>
             ) : (
               rows.map((row) => (
-                <tr key={row.key} className="h-[70px] border-t border-border first:border-t-0">
+                <tr key={row.key} className={`h-[70px] border-t border-border first:border-t-0 ${row.className ?? ""}`}>
                   {row.cells.map((cell, index) => (
                     <td key={index} className="px-4 text-center">
                       {cell}

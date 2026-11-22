@@ -28,13 +28,14 @@ function refresh(clientId: string, itemId: string) {
   revalidatePath(`/admin/${clientId}`, "layout");
 }
 
-// Figma 02 -> 03 / 13: staff confirm or dismiss the AI finding.
-export async function decideFinding(clientId: string, itemId: string, decision: FindingDecision) {
+// Figma 02 -> 03 / 13: staff confirm, dismiss or reopen the AI finding.
+export async function decideFinding(clientId: string, itemId: string, decision: FindingDecision | "reopen") {
+  if (decision !== "confirmed" && decision !== "dismissed" && decision !== "reopen") redirect("/admin/review-queue");
   const { actorName, item } = await submittedItem(clientId, itemId);
-  getAiReviewStore().decide(clientId, itemId, item.fileName!, decision);
+  getAiReviewStore().decide(clientId, itemId, item.fileName!, decision === "reopen" ? undefined : decision);
   getActivityLogStore().append(
     clientId,
-    `${actorName} ${decision === "confirmed" ? "confirmed" : "dismissed"} the AI finding on "${item.label}"`
+    `${actorName} ${decision === "reopen" ? "reopened" : decision} the AI finding on "${item.label}"`
   );
   revalidatePath(reviewPath(clientId, itemId));
   redirect(reviewPath(clientId, itemId));
