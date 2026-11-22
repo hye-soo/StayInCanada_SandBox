@@ -198,18 +198,18 @@ body {
 /* AI review assistant orb: a slow float and a breathing glow so it reads
    as "on"; the ring only spins while a file is being checked. */
 @keyframes ai-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-7px) rotate(2deg); }
 }
 @keyframes ai-glow {
-    0%, 100% { opacity: 0.35; transform: scale(0.85); }
-    50% { opacity: 0.85; transform: scale(1.08); }
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 0.9; transform: scale(1.15); }
 }
 @keyframes ai-spin {
     to { transform: rotate(360deg); }
 }
-.ai-orb { animation: ai-float 4s ease-in-out infinite; }
-.ai-orb-glow { animation: ai-glow 3s ease-in-out infinite; }
+.ai-orb { animation: ai-float 3.2s ease-in-out infinite; }
+.ai-orb-glow { animation: ai-glow 2.6s ease-in-out infinite; }
 .ai-orb-ring { animation: ai-spin 1.6s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
     .ai-orb, .ai-orb-glow, .ai-orb-ring { animation: none; }

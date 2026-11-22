@@ -96,7 +96,7 @@ export default async function AdminReviewQueuePage({ searchParams }: PageProps<"
       <section className="flex items-start gap-5 rounded-xl border border-border bg-card px-6 py-6">
         <div className="flex w-[100px] shrink-0 flex-col items-center gap-1">
           <div className="relative size-[100px]">
-            <span aria-hidden className="ai-orb-glow absolute inset-2 rounded-full bg-azure blur-xl" />
+            <span aria-hidden className="ai-orb-glow absolute inset-3 rounded-full bg-azure blur-lg" />
             {checking ? (
               <span
                 aria-hidden
