@@ -3,7 +3,9 @@ import { Inbox, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { MOCK_INVITES, MOCK_USERS } from "@/lib/data/mock-users.ts";
-import { fillDemoChecklist, fillDemoIntake, resetDemo } from "./actions.ts";
+import { fillDemoChecklist, fillDemoIntake, resetDemo, setAiOrbMode, startAiPassportDemo } from "./actions.ts";
+import { getAiReviewStore } from "@/lib/ai-review.ts";
+import { DemoSwitchButton } from "./demo-switch-button";
 
 const SENDER = "FlowOui";
 const SENDER_ADDRESS = "invitations@flowoui.example";
@@ -15,6 +17,7 @@ const RECEIVED_AT = "10:24 AM";
 export default async function DemoInboxPage({ searchParams }: PageProps<"/demo">) {
   const { filled } = await searchParams;
   const invite = MOCK_INVITES[0]!;
+  const orbMode = getAiReviewStore().orbMode;
   const firstName = invite.name.split(" ")[0];
   const caseManager = MOCK_USERS.find((user) => user.role === "admin")?.name ?? "Your case team";
   const subject = `${firstName}, your FlowOui invitation is ready`;
@@ -106,7 +109,35 @@ export default async function DemoInboxPage({ searchParams }: PageProps<"/demo">
                 Fill Alice&apos;s documents
               </button>
             </form>
-            {filled === "documents" ? (
+            <form action={startAiPassportDemo}>
+              <button type="submit" className="underline">
+                Start AI passport review
+              </button>
+            </form>
+            <a href="/demo/passport-alice-v2.pdf" download className="underline">
+              Download passport v2 (for the re-upload)
+            </a>
+            <form action={setAiOrbMode} className="flex items-center gap-1">
+              <span>AI orb:</span>
+              {(["auto", "working", "idle"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="submit"
+                  name="mode"
+                  value={mode}
+                  aria-pressed={orbMode === mode}
+                  className={orbMode === mode ? "rounded-full bg-primary px-2 py-0.5 text-primary-foreground" : "rounded-full px-2 py-0.5 underline"}
+                >
+                  {mode === "auto" ? "Auto" : mode === "working" ? "Working" : "Idle"}
+                </button>
+              ))}
+            </form>
+            {filled === "ai" ? (
+              <span className="flex items-center gap-3">
+                Alice&apos;s passport v1 is in the review queue.
+                <DemoSwitchButton role="admin" next="/admin/review-queue" label="Open as Maya" />
+              </span>
+            ) : filled === "documents" ? (
               <span>Alice&apos;s documents are set to mixed statuses.</span>
             ) : filled ? (
               <span>Alice&apos;s intake is filled in (not submitted).</span>

@@ -28,7 +28,7 @@ const MATRIX: Record<UserRole, Record<string, boolean>> = {
     viewAllChecklists: true,
     requestChanges: true,
     flagForAdmin: false,
-    approve: false,
+    approve: true,
   },
 };
 
@@ -40,10 +40,9 @@ for (const [role, actions] of Object.entries(MATRIX) as [UserRole, Record<string
   }
 }
 
-test("admin specifically cannot approve, even though it can view and request changes", () => {
-  assert.equal(can("admin", "viewAllChecklists"), true);
+test("admin approves documents after the AI review check (AI never approves)", () => {
   assert.equal(can("admin", "requestChanges"), true);
-  assert.equal(can("admin", "approve"), false);
+  assert.equal(can("admin", "approve"), true);
 });
 
 test("rcic flags issues to Admin internally rather than requesting changes directly", () => {

@@ -1,5 +1,6 @@
 import type { IntakeCategoryId } from "./data/intake-steps.ts";
 import type { IntakeReviewStatus } from "./intake-review.ts";
+import { documentVersion } from "./ai-review.ts";
 import type { ChecklistItem } from "./types.ts";
 
 export interface ReviewQueueClient {
@@ -18,6 +19,8 @@ export interface ReviewQueueItem {
   applicationId: string;
   kind: "document" | "intake";
   title: string;
+  // Documents only: the checklist item, for its AI check.
+  item?: ChecklistItem;
   receivedAt?: number;
   actionLabel: string;
   href: string;
@@ -37,10 +40,11 @@ export function buildReviewQueue(clients: ReviewQueueClient[]): ReviewQueueItem[
           clientName: client.name,
           applicationId: client.applicationId,
           kind: "document" as const,
-          title: item.previousUpload ? `Replacement ${item.label.toLowerCase()}` : item.label,
+          title: `${item.label} \u00b7 v${documentVersion(item)}`,
+          item,
           receivedAt: item.submittedAt,
-          actionLabel: item.previousUpload ? "Compare versions" : "Review document",
-          href: `/admin/${client.clientId}/checklist`,
+          actionLabel: item.previousUpload ? "Compare versions" : "Review",
+          href: `/admin/review-queue/${client.clientId}/${item.id}`,
         })),
       ...(client.intakeSubmittedAt
         ? client.intakeSections

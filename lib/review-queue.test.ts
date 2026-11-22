@@ -38,9 +38,9 @@ test("review queue: submitted documents and intake sections needing review, olde
   assert.deepEqual(
     queue.map((item) => [item.clientId, item.kind, item.title, item.href]),
     [
-      ["b", "document", "Proof of Financial Support", "/admin/b/checklist"],
+      ["b", "document", "Proof of Financial Support \u00b7 v1", "/admin/review-queue/b/proof-of-funds"],
       ["a", "intake", "Intake · Personal", "/admin/a/intake/personal"],
-      ["a", "document", "Replacement passport", "/admin/a/checklist"],
+      ["a", "document", "Passport \u00b7 v2", "/admin/review-queue/a/passport"],
     ]
   );
   assert.equal(queue[2]!.actionLabel, "Compare versions");

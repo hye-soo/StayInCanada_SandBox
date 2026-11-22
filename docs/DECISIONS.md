@@ -544,3 +544,22 @@ calls for one dynamic `intake/[step]` route driven by a data file.
 **Alternatives considered:** keeping the old typed sections and
 restyling only (rejected: Figma's fields don't map onto them); 33
 separate step pages (rejected: duplicate pages per gate answer).
+
+## 2026-11-22 — AI review assistant in the Review queue; staff approve documents
+**Context:** Figma "AI Review Assistant · Demo NEW FLOW": every uploaded
+document gets an automatic AI check that lists possible issues and drafts
+a message to the client. The design has staff (Admin) clicking "Approve
+document", where the permission matrix had reserved approval for RCIC.
+**Decision:**
+- AI checks are simulated for the demo (`lib/ai-review.ts`,
+  `runAiCheck`): deterministic findings, no API key, same result every
+  recording. One function to replace with a real model call later.
+- AI only flags and drafts. Staff confirm or dismiss each finding,
+  edit and send the change request, and approve. Decisions are stored
+  per uploaded file, so a replacement starts fresh.
+- Admin can now approve documents from the Review queue
+  (`lib/permissions.ts`). RCIC's own approve action stays.
+**Alternatives considered:** real Claude API checks (rejected for now:
+needs a key per teammate, costs per check, results vary between demo
+takes); letting AI auto-approve clean files (rejected: staff decide
+every outcome).

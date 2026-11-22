@@ -16,7 +16,11 @@ import {
   getChecklistStore,
   resetChecklistStore,
 } from "@/lib/checklist-store.ts";
-import { resetUploadedFileStore } from "@/lib/uploaded-file-store.ts";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { getUploadedFileStore, resetUploadedFileStore } from "@/lib/uploaded-file-store.ts";
+import { getAiReviewStore, resetAiReviewStore, type AiOrbMode } from "@/lib/ai-review.ts";
+import { startMockSession } from "@/lib/mock-session.ts";
 import { getMemoStore, resetMemoStore } from "@/lib/memo-store.ts";
 import { getNotificationStore } from "@/lib/notification-store.ts";
 import { openChangeRequestMemo } from "@/lib/apply-checklist-action.ts";
@@ -38,6 +42,7 @@ export async function resetDemo() {
   resetIntakeReviewStore();
   resetChecklistStore();
   resetUploadedFileStore();
+  resetAiReviewStore();
   resetMemoStore();
   resetClientProfileStore();
   await clearSession();
@@ -105,4 +110,45 @@ export async function fillDemoChecklist() {
       advisor,
     );
   redirect("/demo?filled=documents");
+}
+
+// Figma "AI Review Assistant" demo, step 01: Alice has just uploaded
+// passport v1 (expiry date cut off) and the AI check has flagged it.
+export async function startAiPassportDemo() {
+  const alice = MOCK_USERS.find((user) => user.role === "client")!;
+  const store = getChecklistStore();
+  const passport = store.getItem(alice.id, "passport")!;
+  const fileName = "passport-alice-v1.pdf";
+  const bytes = new Uint8Array(await readFile(path.join(process.cwd(), "public/demo", fileName)));
+  store.updateItem(alice.id, {
+    ...passport,
+    status: "submitted",
+    fileName,
+    fileSize: bytes.length,
+    submittedAt: Date.now(),
+    staffComment: undefined,
+    previousUpload: undefined,
+  });
+  getUploadedFileStore().save(alice.id, "passport", { name: fileName, bytes });
+  const { orbMode } = getAiReviewStore();
+  resetAiReviewStore();
+  getAiReviewStore().orbMode = orbMode;
+  redirect("/demo?filled=ai");
+}
+
+// Figma "Demo · Switch to staff / Open client request": signs in as
+// Alice or Maya without a password. Local dev demo only.
+export async function switchDemoUser(role: "client" | "admin", next: string) {
+  if (process.env.NODE_ENV === "production") redirect("/login");
+  const user = MOCK_USERS.find((candidate) => candidate.role === role);
+  if (!user) redirect("/login");
+  await startMockSession(user);
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
+}
+
+// Demo: how the AI assistant orb in the staff Review queue looks.
+export async function setAiOrbMode(formData: FormData) {
+  const mode = formData.get("mode");
+  if (mode === "auto" || mode === "working" || mode === "idle") getAiReviewStore().orbMode = mode satisfies AiOrbMode;
+  redirect("/demo?filled=orb");
 }

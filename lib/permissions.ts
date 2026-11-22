@@ -12,12 +12,13 @@ export type PermissionAction =
 // docs/MEETING.md Permission Matrix). Admin is the sole client-facing
 // gate (docs/DECISIONS.md 2026-10-26): only Admin can requestChanges
 // (client-visible); RCIC routes issues through Admin instead
-// (flagForAdmin, internal-only). admin deliberately excludes
-// "approve": only RCIC gives final approval.
+// (flagForAdmin, internal-only). Admin approves documents from the
+// Review queue after checking the AI findings (docs/DECISIONS.md
+// 2026-11-22); AI never approves anything.
 const PERMISSIONS: Record<UserRole, PermissionAction[]> = {
   client: ["uploadOwnDocument", "viewOwnChecklist"],
   rcic: ["viewAllChecklists", "flagForAdmin", "approve"],
-  admin: ["viewAllChecklists", "requestChanges"],
+  admin: ["viewAllChecklists", "requestChanges", "approve"],
 };
 
 export function can(role: UserRole, action: PermissionAction): boolean {

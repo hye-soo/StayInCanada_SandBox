@@ -25,13 +25,15 @@ users only (Firebase sign-in is optional and only used if you add the keys).
 ## Start from the demo inbox (`/demo`)
 
 `/demo` looks like an email inbox with Alice's invitation. Along the bottom
-are three demo controls:
+are the demo controls:
 
 | Button | What it does |
 | --- | --- |
 | **Reset demo** | Back to the start: Alice invited but not signed up, empty intake and documents, no memos, everyone signed out. |
 | **Fill Alice's intake** | Fills in all 25 intake questions with sample answers (not submitted), so you can jump straight to review and submit. |
 | **Fill Alice's documents** | Sets Alice's document checklist to a mix of states (needs changes, required, submitted, in review, completed) and adds matching memos and updates. |
+| **Start AI passport review** | Puts Alice's passport v1 (expiry date cut off) in the staff Review queue, flagged by the AI check. Then **Open as Maya**. |
+| **Download passport v2** | The sample replacement file Alice uploads in the AI review walkthrough. |
 
 All sample data is invented (example.com emails, fake addresses).
 
@@ -68,6 +70,18 @@ from the invitation: **Accept invitation** in the demo inbox opens
 Sign in as Maya → **Overview** and **All clients** → open Alice → **Intake**
 tab to review sections (marking one reviewed switches Alice's My Intake to
 "under review").
+
+**AI review assistant (staff Review queue)**
+
+The AI check is simulated: the same findings every time, no API key. AI only
+points out problems and drafts a message; staff decide every outcome.
+
+1. `/demo` → **Start AI passport review** → **Open as Maya**. The queue shows "1 possible issue" on Alice's passport.
+2. **Review** → **Confirm issue** (or **Dismiss finding**) → **Review draft request** → edit the AI draft → **Send request**.
+3. **Demo · Open client request** (signs in as Alice) → upload the downloaded `passport-alice-v2.pdf`.
+4. **Demo · Switch to staff** → v1 and v2 side by side, "No issues detected" → **Approve document**.
+
+The "Demo ·" buttons switch between Alice and Maya without a password (local dev only).
 
 ## Good to know
 

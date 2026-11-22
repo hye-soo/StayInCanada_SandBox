@@ -10,6 +10,7 @@ import type { ChecklistItemStatus } from "@/lib/types.ts";
 import { DocumentUploadForm, FileCard } from "@/components/patterns/document-upload-form";
 import { formatFileSize } from "@/lib/upload-validation.ts";
 import { uploadMockFile } from "./actions.ts";
+import { DemoSwitchButton } from "@/app/demo/demo-switch-button";
 import { BackLink } from "@/components/ui/back-link";
 import { MemoBubble } from "@/components/patterns/memo-bubble";
 import { getMemoStore } from "@/lib/memo-store.ts";
@@ -230,6 +231,11 @@ export default async function ChecklistItemPage({ params, searchParams }: PagePr
           )}
         </div>
       </div>
+      {item.status === "submitted" ? (
+        <div className="self-start">
+          <DemoSwitchButton role="admin" next={`/admin/review-queue/${uid}/${item.id}`} label="Demo · Switch to staff" />
+        </div>
+      ) : null}
     </main>
   );
 }

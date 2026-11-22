@@ -14,7 +14,7 @@ export function StatusPill({ tone, children }: { tone: Tone; children: React.Rea
   return (
     <span
       className={cn(
-        "inline-flex h-[30px] min-w-[122px] shrink-0 items-center justify-center rounded-full border px-3 text-sm font-medium",
+        "inline-flex h-[30px] min-w-[122px] shrink-0 whitespace-nowrap items-center justify-center rounded-full border px-3 text-sm font-medium",
         TONE_CLASS[tone]
       )}
     >

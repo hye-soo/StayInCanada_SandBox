@@ -39,3 +39,22 @@ export function getUploadedFileStore(): UploadedFileStore {
 export function resetUploadedFileStore(): void {
   holder.__flowouiUploadedFiles = undefined;
 }
+
+// Inline PDF response for "View file" (client's own, or staff's view).
+export function uploadedFileResponse(file: UploadedFile | undefined): Response {
+  if (!file) {
+    return new Response(
+      "This file isn't available to preview. Sample documents in the demo have no file attached; upload a PDF to preview it.",
+      { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } }
+    );
+  }
+  const safeName = file.name.replace(/[^\w.\- ]+/g, "_");
+  return new Response(file.bytes as unknown as BodyInit, {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename="${safeName}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
