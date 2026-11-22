@@ -62,7 +62,7 @@ from the invitation: **Accept invitation** in the demo inbox opens
 **Documents and memos (quick)**
 
 1. `/demo` → **Fill Alice's intake** and **Fill Alice's documents**, then sign in as Alice.
-2. **Document Checklist** → open **Passport** (needs changes) to see the team's memo and replace the file, or **Proof of Financial Support** to upload a PDF (max 4 MB) and preview it with **View submitted file**.
+2. **Document Checklist** → open **Passport** (changes required) to see the team's message and **Upload replacement**, or **Proof of Financial Support** to upload a PDF (max 4 MB) and preview it with **View submitted file**.
 3. **Updates & Memo** → reply to the passport memo, send a **New memo**, filter by Action needed / Unread.
 
 **Staff side**
@@ -78,7 +78,7 @@ points out problems and drafts a message; staff decide every outcome.
 
 1. `/demo` → **Start AI passport review** → **Open as Maya**. The queue shows "1 possible issue" on Alice's passport.
 2. **Review** → **Confirm issue** (or **Dismiss finding**) → **Review draft request** → edit the AI draft → **Send request**.
-3. **Demo · Open client request** (signs in as Alice) → upload the downloaded `passport-alice-v2.pdf`.
+3. **Demo · Open client request** (signs in as Alice) → **Upload replacement** → choose the downloaded `passport-alice-v2.pdf` → **Submit replacement**.
 4. **Demo · Switch to staff** → v1 and v2 side by side, "No issues detected" → **Approve document**.
 
 The "Demo ·" buttons switch between Alice and Maya without a password (local dev only).

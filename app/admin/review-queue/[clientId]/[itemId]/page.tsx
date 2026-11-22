@@ -144,7 +144,7 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
     <main className="flex flex-col gap-6 pt-2">
       {header}
 
-      <div className={cn("grid grid-cols-1 gap-6", replacement ? "xl:grid-cols-[1fr_1fr_380px]" : "xl:grid-cols-[minmax(0,1fr)_450px]")}>
+      <div className={cn("grid grid-cols-1 items-start gap-5", replacement ? "xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_400px]" : "xl:grid-cols-[minmax(0,1fr)_420px]")}>
         {replacement && item.previousUpload ? (
           <PreviewCard
             heading="Original submission · v1"
@@ -173,12 +173,12 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
           fileHref={hasFile ? `/admin/review-queue/${clientId}/${itemId}/file` : undefined}
         />
 
-        <aside className="flex flex-col gap-5 self-stretch rounded-xl border border-border bg-card p-6">
+        <aside className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
           <AiPill tone="blue" className="min-w-0 self-start">
             Internal · Staff only
           </AiPill>
-          <div className="flex flex-col gap-3 border-b border-border pb-5">
-            <h2 className="text-xl font-semibold text-foreground">AI review findings</h2>
+          <div className="flex flex-col gap-2.5 border-b border-border pb-4">
+            <h2 className="text-lg font-semibold text-foreground">AI review findings</h2>
             <div>
               <AiCheckPill check={check} decision={decision} />
             </div>
@@ -187,14 +187,14 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
           <Findings check={check} decision={decision} />
 
           {check.intakeComparison ? (
-            <div className="flex flex-col gap-1.5">
-              <p className={cn("font-semibold text-foreground", issue ? "text-sm" : "text-base")}>Intake comparison</p>
-              <p className={issue ? "text-sm text-muted-foreground" : "text-base text-foreground"}>{check.intakeComparison}</p>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-semibold text-foreground">Intake comparison</p>
+              <p className="text-sm text-muted-foreground">{check.intakeComparison}</p>
             </div>
           ) : null}
 
           {canDecide ? (
-            <div className="mt-auto flex flex-col gap-1 rounded-md bg-secondary px-4 py-3">
+            <div className="flex flex-col gap-0.5 rounded-md bg-secondary px-4 py-2.5">
               <p className="text-sm font-semibold">Awaiting staff review</p>
               <p className="text-xs text-muted-foreground">
                 {replacement ? "Verify the replacement before approving." : "Check the file before approving."}
@@ -203,7 +203,7 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
           ) : null}
 
           {openIssue ? (
-            <div className="mt-auto flex flex-wrap gap-3">
+            <div className="mt-1 flex flex-wrap gap-3">
               <form action={decideFinding.bind(null, clientId, itemId, "confirmed")} className="flex-1">
                 <button type="submit" className={cn(PRIMARY, "w-full min-w-0")}>
                   Confirm issue
@@ -216,7 +216,7 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
               </form>
             </div>
           ) : decision === "confirmed" ? (
-            <div className="mt-auto">{requestDialog("Review draft request", PRIMARY)}</div>
+            <div className="mt-1">{requestDialog("Review draft request", PRIMARY)}</div>
           ) : decision === "dismissed" ? (
             <form action={decideFinding.bind(null, clientId, itemId, "reopen")}>
               <button type="submit" className={PRIMARY}>
@@ -241,7 +241,7 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
         ) : null}
       </div>
 
-      <p className="mt-10 text-sm text-muted-foreground">
+      <p className="mt-6 text-sm text-muted-foreground">
         {canDecide ? "Staff decide whether to approve this document." : "Review the source document before taking action on AI findings."}
       </p>
     </main>
@@ -250,34 +250,34 @@ export default async function DocumentReviewPage({ params }: PageProps<"/admin/r
 
 function Findings({ check, decision }: { check: AiCheck; decision?: FindingDecision }) {
   if (check.status === "checking") {
-    return <p className="text-base text-foreground">The AI check is still running. You can review the file yourself in the meantime.</p>;
+    return <p className="text-sm text-foreground">The AI check is still running. You can review the file yourself in the meantime.</p>;
   }
   if (check.status === "failed") {
-    return <p className="text-base text-foreground">The AI couldn&apos;t read this file. Check it yourself before deciding.</p>;
+    return <p className="text-sm text-foreground">The AI couldn&apos;t read this file. Check it yourself before deciding.</p>;
   }
   if (check.status === "clean") {
     return (
-      <div className="flex flex-col gap-1.5">
-        <p className="text-base font-semibold text-foreground">{check.resolved ? "Previously flagged area" : "No problems found"}</p>
-        <p className="text-base text-foreground">{check.resolved ?? "Check the file before approving."}</p>
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-semibold text-foreground">{check.resolved ? "Previously flagged area" : "No problems found"}</p>
+        <p className="text-sm text-foreground">{check.resolved ?? "Check the file before approving."}</p>
       </div>
     );
   }
   if (decision === "dismissed") {
     return (
-      <div className="flex flex-col gap-1.5">
-        <p className="text-base font-semibold text-foreground">Finding dismissed</p>
-        <p className="text-base text-foreground">Staff can still inspect the original and decide whether to request changes.</p>
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-semibold text-foreground">Finding dismissed</p>
+        <p className="text-sm text-foreground">Staff can still inspect the original and decide whether to request changes.</p>
       </div>
     );
   }
   return (
-    <ul className="flex flex-col gap-5">
+    <ul className="flex flex-col gap-4">
       {check.findings.map((finding) => (
-        <li key={finding.title} className="flex flex-col gap-3">
-          <p className="text-base font-semibold text-foreground">{decision === "confirmed" ? "Issue confirmed by staff" : finding.title}</p>
-          <p className="text-base text-foreground">{finding.detail}</p>
-          <div className="flex flex-col gap-1 rounded-md bg-peach px-4 py-3">
+        <li key={finding.title} className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-foreground">{decision === "confirmed" ? "Issue confirmed by staff" : finding.title}</p>
+          <p className="text-sm text-foreground">{finding.detail}</p>
+          <div className="flex flex-col gap-1 rounded-md bg-peach px-3.5 py-2.5">
             <p className="text-sm font-semibold text-[#8a5000]">{finding.page}</p>
             <p className="text-xs text-[#8a5000]/80">{finding.field}</p>
           </div>
@@ -337,9 +337,9 @@ function PreviewCard({
   const [given = "", ...rest] = clientName.toUpperCase().split(" ");
   return (
     <section className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
-      <div className="flex items-start justify-between gap-2 border-b border-border px-6 py-5">
+      <div className="flex items-start justify-between gap-2 border-b border-border px-5 py-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
+          <h2 className="text-base font-semibold text-foreground">{heading}</h2>
           <p className="text-xs text-muted-foreground">{fileName} · Page 1 of 1</p>
         </div>
         {fileHref ? (
@@ -349,7 +349,7 @@ function PreviewCard({
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-6 px-6 py-6">
+      <div className="flex flex-col gap-4 px-5 py-5">
         {itemId === "passport" ? (
           <div className="overflow-hidden rounded-md border border-border bg-card">
             <div className={cn("px-4 pt-4", cropped ? "h-[195px] overflow-hidden" : "pb-3")}>
@@ -389,7 +389,7 @@ function PreviewCard({
             <p className="text-sm text-muted-foreground">{fileName}</p>
           </div>
         )}
-        {caption ? <p className="text-sm text-muted-foreground">{caption}</p> : null}
+        {caption ? <p className="text-xs text-muted-foreground">{caption}</p> : null}
       </div>
     </section>
   );

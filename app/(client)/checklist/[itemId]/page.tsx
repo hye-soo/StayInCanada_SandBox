@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, ChevronRight } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "cn";
 import { getClientChecklistItem } from "@/lib/client-checklist.ts";
 import { getDocumentGuidance } from "@/lib/data/document-guidance.ts";
@@ -10,10 +10,10 @@ import type { ChecklistItemStatus } from "@/lib/types.ts";
 import { DocumentUploadForm, FileCard } from "@/components/patterns/document-upload-form";
 import { formatFileSize } from "@/lib/upload-validation.ts";
 import { uploadMockFile } from "./actions.ts";
+import { ReplacementView } from "./replacement-view";
+import { getClientProfileStore } from "@/lib/client-profile-store.ts";
 import { DemoSwitchButton } from "@/app/demo/demo-switch-button";
 import { BackLink } from "@/components/ui/back-link";
-import { MemoBubble } from "@/components/patterns/memo-bubble";
-import { getMemoStore } from "@/lib/memo-store.ts";
 import { getUploadedFileStore } from "@/lib/uploaded-file-store.ts";
 
 const STATUS_PILL: Record<ChecklistItemStatus, string> = {
@@ -54,27 +54,35 @@ function CheckList({ items }: { items: string[] }) {
 
 // Figma "Upload flow" 01-05 for one checklist document.
 export default async function ChecklistItemPage({ params, searchParams }: PageProps<"/checklist/[itemId]">) {
-  const { uid } = await requireRole(["client"]);
+  const { uid, displayName } = await requireRole(["client"]);
   const { itemId } = await params;
   const { error, submitted } = await searchParams;
   const item = getClientChecklistItem(uid, itemId);
   if (!item) notFound();
 
   const guidance = getDocumentGuidance(item.id);
-  const canUpload = item.status === "required" || item.status === "changes_required";
-  const justSubmitted = submitted === "1" && item.status === "submitted";
-  // Figma "Upload flow" with changes requested: the team's memo about this
-  // document sits above the upload, and the earlier file can be reopened.
-  const changes = item.status === "changes_required";
-  const changeMemo = changes
-    ? getMemoStore()
-        .list(uid)
-        .find((memo) => memo.startedBy === "staff" && memo.related.href === `/checklist/${item.id}`)
-    : undefined;
-  const staffMessage = changeMemo
-    ? [...changeMemo.messages].reverse().find((message) => message.from === "staff")
-    : undefined;
   const previousFileHref = getUploadedFileStore().get(uid, item.id) ? `/checklist/${item.id}/file` : undefined;
+
+  // Figma "AI Review Assistant" 06-08, 12: changes requested, a submitted
+  // replacement, and approved. A first upload keeps the Upload flow below.
+  if (item.status === "changes_required" || item.status === "approved" || (item.status === "submitted" && item.previousUpload)) {
+    const profile = getClientProfileStore().getProfile(uid);
+    return (
+      <ReplacementView
+        uid={uid}
+        clientName={displayName ?? "You"}
+        application={`${profile.applicationId} \u00b7 ${profile.applicationType}`}
+        item={item}
+        fileHref={previousFileHref}
+        error={typeof error === "string" ? error : undefined}
+      />
+    );
+  }
+
+  // From here: a first upload (Figma "Upload flow"), or the first file
+  // waiting for review.
+  const canUpload = item.status === "required";
+  const justSubmitted = submitted === "1" && item.status === "submitted";
 
   return (
     <main className="flex flex-col gap-6 pt-2">
@@ -89,49 +97,11 @@ export default async function ChecklistItemPage({ params, searchParams }: PagePr
         <p className="text-sm text-muted-foreground">{guidance.hint}</p>
       </header>
 
-      {changes && (staffMessage || item.staffComment) ? (
-        <section className="flex flex-col gap-3 rounded-xl border border-primary/40 bg-secondary px-6 py-5">
-          <Link href="/updates" className="self-start text-xs text-primary hover:underline">
-            Updates &amp; Memo
-          </Link>
-          <h2 className="text-lg font-semibold text-foreground">
-            {changeMemo?.subject ?? `${item.label} needs replacing`} :{" "}
-            <span className="text-primary">Waiting for you</span>
-          </h2>
-          <MemoBubble
-            compact
-            avatarSrc="/overview/advisor-avatar.png"
-            authorName={staffMessage?.authorName ?? "Your case team"}
-            message={staffMessage?.body ?? item.staffComment!}
-          />
-        </section>
-      ) : null}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,410px)]">
         <Card className="min-h-[440px]">
           {canUpload ? (
             <>
-              {changes && item.fileName ? (
-                <div className="flex flex-col gap-3">
-                  <h2 className="text-lg font-semibold text-foreground">Review your previous submission</h2>
-                  {previousFileHref ? (
-                    <a href={previousFileHref} target="_blank" rel="noopener noreferrer" className="rounded-lg hover:opacity-90">
-                      <FileCard
-                        name={item.fileName}
-                        meta={`${item.fileSize ? `${formatFileSize(item.fileSize)} • ` : ""}Previous upload`}
-                      >
-                        <ChevronRight className="mr-2 size-5 text-foreground" aria-hidden />
-                        <span className="sr-only">(opens in a new tab)</span>
-                      </FileCard>
-                    </a>
-                  ) : (
-                    <FileCard
-                      name={item.fileName}
-                      meta={`${item.fileSize ? `${formatFileSize(item.fileSize)} • ` : ""}Previous upload`}
-                    />
-                  )}
-                </div>
-              ) : null}
               <DocumentUploadForm
                 action={uploadMockFile.bind(null, item.id)}
                 initialError={typeof error === "string" ? error : undefined}
@@ -147,12 +117,10 @@ export default async function ChecklistItemPage({ params, searchParams }: PagePr
                 ) : null}
                 <div className="flex flex-col gap-1">
                   <h2 className="text-lg font-semibold text-foreground">
-                    {justSubmitted ? "Document submitted" : item.status === "approved" ? "Document completed" : "Your submitted document"}
+                    {justSubmitted ? "Document submitted" : "Your submitted document"}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {item.status === "approved"
-                      ? "Your case team reviewed and accepted this document."
-                      : `Your ${item.label.toLowerCase()} was submitted and is waiting for review by your case team.`}
+                    Your {item.label.toLowerCase()} was submitted and is waiting for review by your case team.
                   </p>
                 </div>
               </div>
@@ -217,15 +185,11 @@ export default async function ChecklistItemPage({ params, searchParams }: PagePr
           ) : (
             <Card title="What happens next" className="flex-1">
               <CheckList
-                items={
-                  item.status === "approved"
-                    ? ["This document is complete.", "No further action is needed from you."]
-                    : [
-                        "Your case team will review the document.",
-                        "We will notify you if changes are needed.",
-                        "Track the status in Document Checklist.",
-                      ]
-                }
+                items={[
+                  "Your case team will review the document.",
+                  "We will notify you if changes are needed.",
+                  "Track the status in Document Checklist.",
+                ]}
               />
             </Card>
           )}
