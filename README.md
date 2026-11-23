@@ -24,16 +24,16 @@ users only (Firebase sign-in is optional and only used if you add the keys).
 
 ## Start from the demo inbox (`/demo`)
 
-`/demo` looks like an email inbox with Alice's invitation. Along the bottom
+`/demo` looks like an email inbox with Olivia's invitation. Along the bottom
 are the demo controls:
 
 | Button | What it does |
 | --- | --- |
-| **Reset demo** | Back to the start: Alice invited but not signed up, empty intake and documents, no memos, everyone signed out. |
-| **Fill Alice's intake** | Fills in all 25 intake questions with sample answers (not submitted), so you can jump straight to review and submit. |
-| **Fill Alice's documents** | Sets Alice's document checklist to a mix of states (needs changes, required, submitted, in review, completed) and adds matching memos and updates. |
-| **Start AI passport review** | Puts Alice's passport v1 (expiry date cut off) in the staff Review queue, flagged by the AI check. Then **Open as Maya**. |
-| **Download passport v2** | The sample replacement file Alice uploads in the AI review walkthrough. |
+| **Reset demo** | Back to the start: Olivia invited but not signed up, empty intake and documents, no memos, everyone signed out. |
+| **Fill Olivia's intake** | Fills in all 25 intake questions with sample answers (not submitted), so you can jump straight to review and submit. |
+| **Fill Olivia's documents** | Sets Olivia's document checklist to a mix of states (needs changes, required, submitted, in review, completed) and adds matching memos and updates. |
+| **Start AI passport review** | Puts Olivia's passport v1 (expiry date cut off) in the staff Review queue, flagged by the AI check. Then **Open as Noah**. |
+| **Download passport v2** | The sample replacement file Olivia uploads in the AI review walkthrough. |
 
 All sample data is invented (example.com emails, fake addresses).
 
@@ -41,34 +41,34 @@ All sample data is invented (example.com emails, fake addresses).
 
 | Who | Email | Lands on |
 | --- | --- | --- |
-| Alice Chang (client) | `alice@example.com` | `/dashboard` |
-| Maya Patel (staff / admin) | `maya@example.com` | `/admin` |
+| Olivia Chang (client) | `olivia@example.com` | `/dashboard` |
+| Noah Patel (staff / admin) | `noah@example.com` | `/admin` |
 
 The demo passwords are in [`lib/data/mock-users.ts`](lib/data/mock-users.ts).
-Sign in at **http://localhost:3000/login**. Alice can also create her account
+Sign in at **http://localhost:3000/login**. Olivia can also create her account
 from the invitation: **Accept invitation** in the demo inbox opens
-`/invite/welcome-alice`.
+`/invite/welcome-olivia`.
 
 ## Suggested walkthroughs
 
 **Full client journey (from scratch)**
 
-1. `/demo` → **Reset demo** → **Accept invitation** → create Alice's account.
-2. Overview → **My Intake** → answer questions (or press **Fill Alice's intake** on `/demo` to skip ahead).
+1. `/demo` → **Reset demo** → **Accept invitation** → create Olivia's account.
+2. Overview → **My Intake** → answer questions (or press **Fill Olivia's intake** on `/demo` to skip ahead).
 3. After the last question: **Start review** → check each section, edit with the pop-up, see **Review PDF**.
 4. Tick the confirmation → **Send to case team** → success pop-up → **View intake status**.
 5. **Request correction** to send the team a note about a submitted answer.
 
 **Documents and memos (quick)**
 
-1. `/demo` → **Fill Alice's intake** and **Fill Alice's documents**, then sign in as Alice.
+1. `/demo` → **Fill Olivia's intake** and **Fill Olivia's documents**, then sign in as Olivia.
 2. **Document Checklist** → open **Passport** (changes required) to see the team's message and **Upload replacement**, or **Proof of Financial Support** to upload a PDF (max 4 MB) and preview it with **View submitted file**.
 3. **Updates & Memo** → reply to the passport memo, send a **New memo**, filter by Action needed / Unread.
 
 **Staff side**
 
-Sign in as Maya → **Overview** and **All clients** → open Alice → **Intake**
-tab to review sections (marking one reviewed switches Alice's My Intake to
+Sign in as Noah → **Overview** and **All clients** → open Olivia → **Intake**
+tab to review sections (marking one reviewed switches Olivia's My Intake to
 "under review").
 
 **AI review assistant (staff Review queue)**
@@ -76,12 +76,12 @@ tab to review sections (marking one reviewed switches Alice's My Intake to
 The AI check is simulated: the same findings every time, no API key. AI only
 points out problems and drafts a message; staff decide every outcome.
 
-1. `/demo` → **Start AI passport review** → **Open as Maya**. The queue shows "1 possible issue" on Alice's passport.
+1. `/demo` → **Start AI passport review** → **Open as Noah**. The queue shows "1 possible issue" on Olivia's passport.
 2. **Review** → **Confirm issue** (or **Dismiss finding**) → **Review draft request** → edit the AI draft → **Send request**.
-3. **Demo · Open client request** (signs in as Alice) → **Upload replacement** → choose the downloaded `passport-alice-v2.pdf` → **Submit replacement**.
+3. **Demo · Open client request** (signs in as Olivia) → **Upload replacement** → choose the downloaded `passport-olivia-v2.pdf` → **Submit replacement**.
 4. **Demo · Switch to staff** → v1 and v2 side by side, "No issues detected" → **Approve document**.
 
-The "Demo ·" buttons switch between Alice and Maya without a password (local dev only).
+The "Demo ·" buttons switch between Olivia and Noah without a password (local dev only).
 
 ## Good to know
 

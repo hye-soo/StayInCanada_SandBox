@@ -14,25 +14,25 @@ export interface MockUser {
 
 export const MOCK_USERS: MockUser[] = [
     {
-        id: "client-alice",
+        id: "client-olivia",
         role: "client",
-        name: "Alice Chang",
-        email: "alice@example.com",
-        password: "alice-password",
+        name: "Olivia Chang",
+        email: "olivia@example.com",
+        password: "olivia-password",
     },
     {
-        id: "staff-maya",
+        id: "staff-noah",
         role: "admin",
-        name: "Maya Patel",
-        email: "maya@example.com",
+        name: "Noah Patel",
+        email: "noah@example.com",
         password: "flowoui-staff-demo",
     },
 ];
 
-// Open /invite/welcome-alice to accept Alice's invitation (A01).
+// Open /invite/welcome-olivia to accept Olivia's invitation (A01).
 export const MOCK_INVITES = [
-    { token: "welcome-alice", email: "alice@example.com", name: "Alice Chang" },
+    { token: "welcome-olivia", email: "olivia@example.com", name: "Olivia Chang" },
     // Demo only: invitations still waiting on the client (staff Invitations page).
-    { token: "welcome-noah", email: "noah@example.com", name: "Noah Kim", applicationType: "Work permit", daysAgo: 2 },
+    { token: "welcome-ethan", email: "ethan@example.com", name: "Ethan Kim", applicationType: "Work permit", daysAgo: 2 },
     { token: "welcome-lena", email: "lena@example.com", name: "Lena Ortiz", applicationType: "Visitor extension", daysAgo: 6 },
 ];

@@ -18,7 +18,7 @@ export function RequestChangesDialog({
   triggerClassName,
 }: {
   clientFirstName: string;
-  // e.g. "Alice Chang · Passport / v1"
+  // e.g. "Olivia Chang · Passport / v1"
   requirement: string;
   draft?: string;
   action: (formData: FormData) => Promise<void>;

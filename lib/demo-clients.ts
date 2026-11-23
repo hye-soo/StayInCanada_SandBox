@@ -34,7 +34,7 @@ function intakeFor(name: string, email: string, state: "submitted" | "in_progres
 }
 
 // Demo only: fills the staff screens with a believable caseload (plus
-// Alice, the client you can sign in as). Safe to call on every request.
+// Olivia, the client you can sign in as). Safe to call on every request.
 export function ensureDemoClients(now: number = Date.now()): void {
   // Each store is seeded on its own: in dev a code change can recreate
   // one store (empty) while the others keep their data.
@@ -48,8 +48,8 @@ function seedCaseload(now: number): void {
   if (seeded.has(checklists)) return;
   seeded.add(checklists);
 
-  const alice = MOCK_USERS.find((user) => user.role === "client");
-  if (alice) checklists.getChecklist(alice.id);
+  const olivia = MOCK_USERS.find((user) => user.role === "client");
+  if (olivia) checklists.getChecklist(olivia.id);
 
   for (const client of DEMO_CLIENTS) {
     const items = checklists.getChecklist(client.id);
@@ -90,25 +90,25 @@ function seedCaseload(now: number): void {
 
 // A few conversations so both Memo & Updates feeds have something to
 // read: a new question, a reply waiting on staff, a request with a
-// client, and a welcome note for Alice.
+// client, and a welcome note for Olivia.
 function seedMemos(): void {
   const memos = getMemoStore();
   if (seeded.has(memos)) return;
   seeded.add(memos);
-  const alice = MOCK_USERS.find((user) => user.role === "client");
-  if (alice) {
-    memos.create(alice.id, {
+  const olivia = MOCK_USERS.find((user) => user.role === "client");
+  if (olivia) {
+    memos.create(olivia.id, {
       from: "staff",
-      authorName: "Maya Patel",
+      authorName: "Noah Patel",
       subject: "Welcome to FlowOui",
-      body: "Hi Alice, I'm your case coordinator. Start with your intake, and message me here if anything is unclear.",
+      body: "Hi Olivia, I'm your case coordinator. Start with your intake, and message me here if anything is unclear.",
       related: { label: "My Intake", href: "/questionnaire" },
       actionLabel: "Open my intake",
     });
   }
   memos.create("client-jordan-lee", {
     from: "staff",
-    authorName: "Maya Patel",
+    authorName: "Noah Patel",
     subject: "Updated job offer letter",
     body: "Your employer's new letter has a different start date. Could you upload the signed version?",
     related: { label: "Document checklist", href: "/checklist" },
@@ -116,7 +116,7 @@ function seedMemos(): void {
   });
   const riley = memos.create("client-riley-singh", {
     from: "staff",
-    authorName: "Maya Patel",
+    authorName: "Noah Patel",
     subject: "Language test results",
     body: "We still need your IELTS results. Do you have a test date booked?",
     related: { label: "Document checklist", href: "/checklist" },

@@ -1,18 +1,18 @@
 import type { IntakeAnswers } from "../intake.ts";
 
-// Demo only: a finished intake for the mock client Alice, so the
+// Demo only: a finished intake for the mock client Olivia, so the
 // review/submit screens can be shown without typing 25 steps.
 // Every value is invented.
 export const SAMPLE_INTAKE: IntakeAnswers = {
   "legal-identity": {
-    values: { lastName: "Chang", firstName: "Alice", middleName: "", otherNames: "Chang Mei-Ling", citizenship: "Taiwan" },
+    values: { lastName: "Chang", firstName: "Olivia", middleName: "", otherNames: "Chang Mei-Ling", citizenship: "Taiwan" },
   },
   "birth-physical": {
     values: { dateOfBirth: "1996-04-12", placeOfBirth: "Taipei, Taiwan", sex: "Female", eyeColour: "Brown", height: "163 cm" },
   },
   contact: {
     values: {
-      email: "alice@example.com",
+      email: "olivia@example.com",
       cellphone: "+1 604 555 0142",
       landline: "",
       occupation: "Graduate student",

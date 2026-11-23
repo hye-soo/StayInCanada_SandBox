@@ -101,12 +101,12 @@ export default async function DemoInboxPage({ searchParams }: PageProps<"/demo">
             </form>
             <form action={fillDemoIntake}>
               <button type="submit" className="underline">
-                Fill Alice&apos;s intake
+                Fill Olivia&apos;s intake
               </button>
             </form>
             <form action={fillDemoChecklist}>
               <button type="submit" className="underline">
-                Fill Alice&apos;s documents
+                Fill Olivia&apos;s documents
               </button>
             </form>
             <form action={startAiPassportDemo}>
@@ -114,7 +114,7 @@ export default async function DemoInboxPage({ searchParams }: PageProps<"/demo">
                 Start AI passport review
               </button>
             </form>
-            <a href="/demo/passport-alice-v2.pdf" download className="underline">
+            <a href="/demo/passport-olivia-v2.pdf" download className="underline">
               Download passport v2 (for the re-upload)
             </a>
             <form action={setAiOrbMode} className="flex items-center gap-1">
@@ -134,13 +134,13 @@ export default async function DemoInboxPage({ searchParams }: PageProps<"/demo">
             </form>
             {filled === "ai" ? (
               <span className="flex items-center gap-3">
-                Alice&apos;s passport v1 is in the review queue.
-                <DemoSwitchButton role="admin" next="/admin/review-queue" label="Open as Maya" />
+                Olivia&apos;s passport v1 is in the review queue.
+                <DemoSwitchButton role="admin" next="/admin/review-queue" label="Open as Noah" />
               </span>
             ) : filled === "documents" ? (
-              <span>Alice&apos;s documents are set to mixed statuses.</span>
+              <span>Olivia&apos;s documents are set to mixed statuses.</span>
             ) : filled ? (
-              <span>Alice&apos;s intake is filled in (not submitted).</span>
+              <span>Olivia&apos;s intake is filled in (not submitted).</span>
             ) : null}
           </div>
         </main>

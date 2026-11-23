@@ -1,7 +1,7 @@
 import type { ChecklistItemStatus } from "../types.ts";
 
 // Demo only: extra clients so the staff screens (overview, all clients,
-// review queue) look like a real caseload. They can't sign in; Alice is
+// review queue) look like a real caseload. They can't sign in; Olivia is
 // still the one client you can walk through. Every name and email is
 // invented.
 export interface DemoClient {
@@ -20,7 +20,7 @@ export interface DemoClient {
   daysAgo: number;
 }
 
-const ME = "Maya Patel";
+const ME = "Noah Patel";
 const OTHER = "Alex Morgan";
 
 export const DEMO_CLIENTS: DemoClient[] = [

@@ -58,7 +58,7 @@ export function getMockAuthStore(): MockAuthStore {
   return store;
 }
 
-// Demo only: back to the seeded users (Alice invited, not activated).
+// Demo only: back to the seeded users (Olivia invited, not activated).
 export function resetMockAuthStore(): void {
   store = undefined;
 }

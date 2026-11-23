@@ -37,9 +37,9 @@ test("an invite carries the client's name when one is given", () => {
   assert.equal(getInviteStore().get(invite.token)?.name, "Named Client");
 });
 
-test("the mock invitation for Alice is seeded", () => {
-  const invite = getInviteStore().get("welcome-alice");
-  assert.equal(invite?.name, "Alice Chang");
+test("the mock invitation for Olivia is seeded", () => {
+  const invite = getInviteStore().get("welcome-olivia");
+  assert.equal(invite?.name, "Olivia Chang");
   assert.equal(isInviteValid(invite), true);
 });
 
@@ -55,9 +55,9 @@ test("isInviteValid: true for an unused invite, false for missing/used", () => {
 // Keep last: resetting replaces the shared store other tests write to.
 test("resetInviteStore makes a used seeded invite valid again", async () => {
   const { resetInviteStore } = await import("./invite-store.ts");
-  getInviteStore().markUsed("welcome-alice");
+  getInviteStore().markUsed("welcome-olivia");
   resetInviteStore();
-  assert.equal(isInviteValid(getInviteStore().get("welcome-alice")), true);
+  assert.equal(isInviteValid(getInviteStore().get("welcome-olivia")), true);
 });
 
 test("list shows every invitation newest first, with its application type", () => {

@@ -3,7 +3,7 @@ import { switchDemoUser } from "./actions.ts";
 const DASHED =
   "flex h-10 items-center justify-center rounded-full border border-dashed border-muted-foreground px-6 text-sm text-muted-foreground hover:bg-secondary";
 
-// Figma "Demo · ..." buttons: jump between Alice (client) and Maya
+// Figma "Demo · ..." buttons: jump between Olivia (client) and Noah
 // (staff) while recording, without signing out and in.
 export function DemoSwitchButton({
   role,

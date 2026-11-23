@@ -19,8 +19,8 @@ export interface ClientProfileStore {
 
 function defaultProfile(): ClientProfile {
   return {
-    // Maya is the demo's staff member (case coordinator).
-    assignedAdvisorName: "Maya Patel",
+    // Noah is the demo's staff member (case coordinator).
+    assignedAdvisorName: "Noah Patel",
     assignedRcicName: "Jean Martin",
     applicationId: "FO-2026-014",
     dueDate: "06/14/2027",
